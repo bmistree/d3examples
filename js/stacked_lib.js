@@ -16,7 +16,7 @@
         // default parameters
         this.color_dict = new DefaultColorDict();
         this.bar_width = 40;
-        this.bar_spacing = 5;
+        this.bar_spacing = 10;
         this.between_experiments_spacing = 30;
         this.hover_func = function(){};
         this.unhover_func = function(){};
