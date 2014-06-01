@@ -28,6 +28,7 @@ function on_ready()
                  return x_pos;
              }).
         attr('cy',50).
+        attr('r',20).
         style('fill','steelblue');
 }
 
