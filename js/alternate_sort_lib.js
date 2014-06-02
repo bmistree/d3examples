@@ -77,9 +77,14 @@ AlternateSorter.prototype.original_draw = function()
         on('mouseover',
            function(datum)
            {
-               $('#' + this_param.params.notes_div_id).html(
-                   this_param.sorted_by_field + ': ' +
-                       datum[this_param.sorted_by_field]);
+               var inner_html = '';
+               for (var i = 0; i < this_param.params.indices_to_sort_by.length;
+                    ++i)
+               {
+                   var index = this_param.params.indices_to_sort_by[i];
+                   inner_html += index + ': ' + datum[index] + '<br/>';
+               }
+               $('#' + this_param.params.notes_div_id).html(inner_html);
            }).
         on('mouseout',
            function(datum)
