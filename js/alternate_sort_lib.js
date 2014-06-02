@@ -39,8 +39,7 @@ AlternateSorter.prototype.draw_alternate_sort = function (all_data,params)
     }
     
     $('#' + params.div_id_to_draw_on).html(selector_html);
-    $('#' + params.selector_id).click(this.selector_listener);
-
+    $('#' + params.selector_id).change(this.selector_listener.bind(this));
     this.original_draw();
 };
 
@@ -67,7 +66,6 @@ AlternateSorter.prototype.original_draw = function()
         attr('cx',
              function(datum)
              {
-                 console.log(this_param.sorted_by_field);
                  var x_pos = x_pos_scale(datum[this_param.sorted_by_field]);
                  return x_pos;
              }).
@@ -79,6 +77,7 @@ AlternateSorter.prototype.original_draw = function()
 /**
  Gets called when selector updated
  */
+
 AlternateSorter.prototype.selector_listener = function()
 {
     var prev_sorted_field = this.sorted_by_field;
@@ -88,14 +87,13 @@ AlternateSorter.prototype.selector_listener = function()
     var prev_min_value = min_field_value(this.all_data,prev_sorted_field);
     var prev_max_value = max_field_value(this.all_data,prev_sorted_field);
     
-    var min_value = min_field_value(this.all_data,field_to_sort_by);
-    var max_value = max_field_value(this.all_data,field_to_sort_by);
+    var min_value = min_field_value(this.all_data,this.sorted_by_field);
+    var max_value = max_field_value(this.all_data,this.sorted_by_field);
 
     var prev_x_pos_scale = d3.scale.linear().domain([prev_min_value,prev_max_value]).
         rangeRound([0,this.params.width]);
     var new_x_pos_scale = d3.scale.linear().domain([min_value,max_value]).
         rangeRound([0,this.params.width]);
-
 
     var this_param = this;
     this.all_circles.transition().
@@ -104,7 +102,7 @@ AlternateSorter.prototype.selector_listener = function()
              function (datum)
              {
                  var prev_x_pos = prev_x_pos_scale(datum[prev_sorted_field]);
-                 var new_x_pos = new_x_pos_scale(datum[field_to_sort_by]);
+                 var new_x_pos = new_x_pos_scale(datum[this_param.sorted_by_field]);
                  // if translating from left-to-right, then decrease
                  // height
                  if (( prev_x_pos < this_param.params.width/2) &&
@@ -134,7 +132,7 @@ AlternateSorter.prototype.selector_listener = function()
                      attr('cx',
                           function (datum)
                           {
-                              return new_x_pos_scale(datum[field_to_sort_by]);
+                              return new_x_pos_scale(datum[this_param.sorted_by_field]);
                           }).duration(1000).
                      each('end',
                          function()
@@ -142,7 +140,7 @@ AlternateSorter.prototype.selector_listener = function()
                              // now undo vertical movements of data
                              d3.select(this).
                                  transition().
-                                 attr('cy',this.params.normal_circle_height).duration(1000);
+                                 attr('cy',this_param.params.normal_circle_height).duration(1000);
                          });
              });
 };
