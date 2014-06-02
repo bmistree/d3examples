@@ -10,6 +10,10 @@ function AlternateSortParams(
     this.selector_id = selector_id;
     this.div_height = div_height;
     this.indices_to_sort_by = indices_to_sort_by;
+    this.width = 500;
+    this.normal_circle_height = 50;
+    this.lower_circle_height = 80;
+    this.higher_circle_height = 20;
 }
 
 function AlternateSorter()
@@ -22,6 +26,10 @@ function AlternateSorter()
  */
 AlternateSorter.prototype.draw_alternate_sort = function (all_data,params)
 {
+    this.all_data = all_data;
+    this.sorted_by_field = params.indices_to_sort_by[0];
+    this.params = params;
+    
     var selector_html = '<select id="' + params.selector_id + '">';
     for (var i =0; i < params.indices_to_sort_by.length; ++i)
     {
@@ -31,8 +39,113 @@ AlternateSorter.prototype.draw_alternate_sort = function (all_data,params)
     }
     
     $('#' + params.div_id_to_draw_on).html(selector_html);
+    $('#' + params.selector_id).click(this.selector_listener);
+
+    this.original_draw();
 };
 
+AlternateSorter.prototype.original_draw = function()
+{
+    var min_value = min_field_value(this.all_data,this.sorted_by_field);
+    var max_value = max_field_value(this.all_data,this.sorted_by_field);
+    
+    var x_pos_scale = d3.scale.linear().domain([min_value,max_value]).
+        rangeRound([0,this.params.width]);
+
+    
+    var drawing_area = d3.select('#' + this.params.div_id_to_draw_on).
+        append('svg:svg').
+        attr('width', this.params.width).
+        attr('height', this.params.div_height);
+
+    var this_param = this;
+    
+    this.all_circles = drawing_area.selectAll('circle').
+        data(this.all_data).
+        enter().
+        append('circle').
+        attr('cx',
+             function(datum)
+             {
+                 console.log(this_param.sorted_by_field);
+                 var x_pos = x_pos_scale(datum[this_param.sorted_by_field]);
+                 return x_pos;
+             }).
+        attr('cy',this_param.params.normal_circle_height).
+        attr('r',10).
+        style('fill','steelblue');
+};
+
+/**
+ Gets called when selector updated
+ */
+AlternateSorter.prototype.selector_listener = function()
+{
+    var prev_sorted_field = this.sorted_by_field;
+    this.sorted_by_field =
+        $('#' + this.params.selector_id).find(':selected').text();
+
+    var prev_min_value = min_field_value(this.all_data,prev_sorted_field);
+    var prev_max_value = max_field_value(this.all_data,prev_sorted_field);
+    
+    var min_value = min_field_value(this.all_data,field_to_sort_by);
+    var max_value = max_field_value(this.all_data,field_to_sort_by);
+
+    var prev_x_pos_scale = d3.scale.linear().domain([prev_min_value,prev_max_value]).
+        rangeRound([0,this.params.width]);
+    var new_x_pos_scale = d3.scale.linear().domain([min_value,max_value]).
+        rangeRound([0,this.params.width]);
+
+
+    var this_param = this;
+    this.all_circles.transition().
+        attr('cy',
+             // First move circles up or down
+             function (datum)
+             {
+                 var prev_x_pos = prev_x_pos_scale(datum[prev_sorted_field]);
+                 var new_x_pos = new_x_pos_scale(datum[field_to_sort_by]);
+                 // if translating from left-to-right, then decrease
+                 // height
+                 if (( prev_x_pos < this_param.params.width/2) &&
+                     (new_x_pos > this_param.params.width/2))
+                 {
+                     return this_param.params.lower_circle_height;
+                 }
+
+                 // if translating from right-to-left, then increase
+                 // height
+                 if (( prev_x_pos > this_param.params.width/2) &&
+                     (new_x_pos < this_param.params.width/2))
+                 {
+                     return this_param.params.higher_circle_height;
+                 }
+
+                 return this_param.params.normal_circle_height;
+
+             }).
+        duration(1000).
+        each('end',
+             // now move circles to their final horizontal position
+             function()
+             {
+                 d3.select(this).
+                     transition().
+                     attr('cx',
+                          function (datum)
+                          {
+                              return new_x_pos_scale(datum[field_to_sort_by]);
+                          }).duration(1000).
+                     each('end',
+                         function()
+                         {
+                             // now undo vertical movements of data
+                             d3.select(this).
+                                 transition().
+                                 attr('cy',this.params.normal_circle_height).duration(1000);
+                         });
+             });
+};
 
 
 
