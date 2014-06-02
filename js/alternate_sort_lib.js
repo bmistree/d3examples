@@ -4,9 +4,11 @@
  It's a field in an object that we should sort the object by.
  */
 function AlternateSortParams(
-    div_id_to_draw_on,selector_id,div_height,indices_to_sort_by)
+    div_id_to_draw_on,notes_div_id,selector_id,div_height,
+    indices_to_sort_by)
 {
     this.div_id_to_draw_on = div_id_to_draw_on;
+    this.notes_div_id = notes_div_id;
     this.selector_id = selector_id;
     this.div_height = div_height;
     this.indices_to_sort_by = indices_to_sort_by;
@@ -71,7 +73,19 @@ AlternateSorter.prototype.original_draw = function()
              }).
         attr('cy',this_param.params.normal_circle_height).
         attr('r',10).
-        style('fill','steelblue');
+        style('fill','steelblue').
+        on('mouseover',
+           function(datum)
+           {
+               $('#' + this_param.params.notes_div_id).html(
+                   this_param.sorted_by_field + ': ' +
+                       datum[this_param.sorted_by_field]);
+           }).
+        on('mouseout',
+           function(datum)
+           {
+               $('#' + this_param.params.notes_div_id).html('<br/><br/>');
+           });
 };
 
 /**

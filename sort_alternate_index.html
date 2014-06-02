@@ -15,38 +15,41 @@
 
     <div id="graph_id">
     </div>
-
+    <div id="notes_id">
+      <br/><br/>
+    </div>
+    
     <script>
       var all_data = [
           {
-              "a":1,
-              "b":5,
-              "c":10,
+              "hotspot":1,
+              "conform":5,
+              "bladder":10,
           },
           {
-              "a":10,
-              "b":6,
-              "c":1,
+              "hotspot":10,
+              "conform":6,
+              "bladder":1,
           },
           {
-              "a":8,
-              "b":1,
-              "c":3,
+              "hotspot":8,
+              "conform":1,
+              "bladder":3,
           },
           {
-              "a":3,
-              "b":10,
-              "c":4,
+              "hotspot":3,
+              "conform":10,
+              "bladder":4,
           },
           {
-              "a":4,
-              "b":8,
-              "c":8,
+              "hotspot":4,
+              "conform":8,
+              "bladder":8,
           }
       ];
       
       var alternate_sort_params = new AlternateSortParams(
-         "graph_id","selector_id",300,["a","b","c"]);
+         "graph_id","notes_id","selector_id",300,["hotspot","conform","bladder"]);
       var alternate_sorter = new AlternateSorter();
       alternate_sorter.draw_alternate_sort(all_data,alternate_sort_params);
     </script>
