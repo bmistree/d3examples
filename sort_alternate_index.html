@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <script type="text/javascript" src="data/alternate_sort_data.js">
+    </script>
+    <script type="text/javascript" src="lib/jquery-2.1.1.min.js">
+    </script>
+    <script type="text/javascript" src="lib/d3.min.js">
+    </script>
+    <script type="text/javascript" src="js/alternate_sort_lib.js">
+    </script>
+    
+    <script>
+      $(document).ready(on_ready);
+    </script>
+  </head>
+
+  <body>
+
+    <div id="selector_id">
+    </div>
+    <div id="graph_id">
+    </div>
+
+    <script>
+      var all_data = [
+          {
+              "a":1,
+              "b":5,
+              "c":10,
+          },
+          {
+              "a":10,
+              "b":6,
+              "c":1,
+          },
+          {
+              "a":8,
+              "b":1,
+              "c":3,
+          },
+          {
+              "a":3,
+              "b":10,
+              "c":4,
+          },
+          {
+              "a":4,
+              "b":8,
+              "c":8,
+          }
+      ];
+      
+      var alternate_sort_params = new AlternateSortParams(
+         "graph_id","selector_id",300,["a","b","c"]);
+      var alternate_sorter = new AlternateSorter();
+      alternate_sorter.draw_alternate_sort(all_data,alternate_sort_params);
+    </script>
+    
+  </body>
+  
+</html>
+
