@@ -1,5 +1,6 @@
 CHECKBOX_ID_PREFIX = 'check_box_id_prefix_';
 TABLE_ID_PREFIX = 'table_id_prefix_';
+ROW_ID_PREFIX = 'row_id_prefix_';
 
 WIDTH = 500;
 HEIGHT = 500;
@@ -48,28 +49,39 @@ function add_checkbox_listeners(obj_fields_list,obj_list)
         var obj_field = obj_fields_list[i];
         var checkbox_id = CHECKBOX_ID_PREFIX + i;
         $('#' + checkbox_id).click(
-            checkbox_listener_factory(obj_field,obj_list));
+            checkbox_listener_factory(obj_field,i,obj_list));
     }
 }
 
 /**
  @returns function
  */
-function checkbox_listener_factory(obj_field,obj_list,drawing_area)
+function checkbox_listener_factory(obj_field,obj_field_index,obj_list)
 {
     return function()
     {
+        var is_checked = $(this).prop('checked');
         for (var i = 0; i < obj_list.length; ++i)
         {
             var obj_table_id = TABLE_ID_PREFIX + i;
-            $("<tr><td>your row html</td></tr>").
-                hide().
-                insertAfter(
-                    $('#' + obj_table_id).parent().parent()).slideDown('slow');
+            var row_id = ROW_ID_PREFIX + '_' + i + '_' + obj_field_index;
+
+            if (is_checked)
+            {
+                $('<tr id="' + row_id +'"><td>your row html</td></tr>').
+                    hide().
+                    insertAfter(
+                        $('#' + obj_table_id).
+                            parent().
+                            parent()).
+                    slideDown('slow');
+            }
+            else
+            {
+                $('#' + row_id).fadeOut();
+            }
         }
         
-        console.log('Clicked');
-        console.log(this);
     };
 }
 
