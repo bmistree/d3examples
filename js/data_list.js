@@ -31,9 +31,16 @@ function add_tables(drawing_div_id,obj_list,obj_fields_list)
     var table_html = '<table><tr><td style="width:50px;"></td>';
     for (var i = 0; i < obj_list.length; ++i)
     {
+        table_html += '<td>Patient ' + i + '</td>';
+        table_html += '<td style="width:20px;"></td>';
+    }
+
+    table_html += '</tr><tr><td style="width:50px;"></td>';
+    for (i = 0; i < obj_list.length; ++i)
+    {
         table_html += (
             '<td> ' +
-                '<table class="table table-striped">' +
+                '<table>' +
                 '<tr id="' + TABLE_ID_PREFIX + i +
                 '"></tr></table>' +
             '</td>');
