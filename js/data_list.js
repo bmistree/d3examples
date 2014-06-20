@@ -37,6 +37,7 @@ function add_tables(drawing_div_id,obj_list,obj_fields_list)
                 '<tr id="' + TABLE_ID_PREFIX + i +
                 '"></tr></table>' +
             '</td>');
+        table_html += '<td style="width:20px;"></td>';
     }
     table_html += '</tr></table>';    
     $('#' + drawing_div_id).html(table_html);
