@@ -34,7 +34,7 @@ function add_tables(drawing_div_id,obj_list,obj_fields_list)
         table_html += '<td>Patient ' + i + '</td>';
         table_html += '<td style="width:20px;"></td>';
     }
-
+    
     table_html += '</tr><tr><td style="width:50px;"></td>';
     for (i = 0; i < obj_list.length; ++i)
     {
@@ -49,6 +49,34 @@ function add_tables(drawing_div_id,obj_list,obj_fields_list)
     table_html += '</tr></table>';    
     $('#' + drawing_div_id).html(table_html);
 }
+
+function find_max(obj_list,obj_field)
+{
+    var max = null;
+    for (var i=0; i < obj_list.length; ++i)
+    {
+        var val = obj_list[i][obj_field];
+        if (max === null)
+            max = val;
+        if (val > max)
+            max = val;
+    }
+    return max;
+}
+function find_min(obj_list,obj_field)
+{
+    var min = null;
+    for (var i=0; i < obj_list.length; ++i)
+    {
+        var val = obj_list[i][obj_field];
+        if (min === null)
+            min = val;
+        if (val < min)
+            min = val;
+    }
+    return min;
+}
+
 
 
 function add_checkbox_listeners(obj_fields_list,obj_list)
@@ -76,11 +104,21 @@ function checkbox_listener_factory(obj_field,obj_field_index,obj_list)
             var obj_table_id = TABLE_ID_PREFIX + i;
             var row_id = ROW_ID_PREFIX + '_' + i + '_' + obj_field_index;
 
+
+            var max = find_max(obj_list,obj_field);
+            var min = find_min(obj_list,obj_field);
+            var color_scale = d3.scale.linear()
+                .domain([min,max])
+                .range(["white", "red"]);
+            
             if (is_checked)
             {
+                var val = obj[obj_field];
+                var color = color_scale(val);
+                
                 var row_html =
                     '<tr id="' + row_id +'">' + 
-                    '<td>' + obj_field + ': &nbsp&nbsp' + obj[obj_field] + 
+                    '<td bgcolor="' + color+ '">' + obj_field + ': &nbsp&nbsp' + val + 
                     '</td></tr>';
                 
                 $(row_html).
