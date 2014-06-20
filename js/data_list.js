@@ -28,12 +28,13 @@ function draw_data_list (
 
 function add_tables(drawing_div_id,obj_list,obj_fields_list)
 {
-    var table_html = '<table><tr>';
+    var table_html = '<table><tr><td style="width:50px;"></td>';
     for (var i = 0; i < obj_list.length; ++i)
     {
         table_html += (
             '<td> ' +
-                '<table> <tr id="' + TABLE_ID_PREFIX + i +
+                '<table class="table table-striped">' +
+                '<tr id="' + TABLE_ID_PREFIX + i +
                 '"></tr></table>' +
             '</td>');
     }
@@ -63,12 +64,18 @@ function checkbox_listener_factory(obj_field,obj_field_index,obj_list)
         var is_checked = $(this).prop('checked');
         for (var i = 0; i < obj_list.length; ++i)
         {
+            var obj = obj_list[i];
             var obj_table_id = TABLE_ID_PREFIX + i;
             var row_id = ROW_ID_PREFIX + '_' + i + '_' + obj_field_index;
 
             if (is_checked)
             {
-                $('<tr id="' + row_id +'"><td>your row html</td></tr>').
+                var row_html =
+                    '<tr id="' + row_id +'">' + 
+                    '<td>' + obj_field + ': &nbsp&nbsp' + obj[obj_field] + 
+                    '</td></tr>';
+                
+                $(row_html).
                     hide().
                     insertAfter(
                         $('#' + obj_table_id).
