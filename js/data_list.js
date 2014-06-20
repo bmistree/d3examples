@@ -29,9 +29,14 @@ function add_tables(drawing_div_id,obj_list,obj_fields_list)
 {
     var table_html = '<table><tr>';
     for (var i = 0; i < obj_list.length; ++i)
-        table_html += '<td id="' + TABLE_ID_PREFIX + i +'"></td>';
-    table_html += '</tr></table>';
-    
+    {
+        table_html += (
+            '<td> ' +
+                '<table> <tr id="' + TABLE_ID_PREFIX + i +
+                '"></tr></table>' +
+            '</td>');
+    }
+    table_html += '</tr></table>';    
     $('#' + drawing_div_id).html(table_html);
 }
 
@@ -54,6 +59,15 @@ function checkbox_listener_factory(obj_field,obj_list,drawing_area)
 {
     return function()
     {
+        for (var i = 0; i < obj_list.length; ++i)
+        {
+            var obj_table_id = TABLE_ID_PREFIX + i;
+            $("<tr><td>your row html</td></tr>").
+                hide().
+                insertAfter(
+                    $('#' + obj_table_id).parent().parent()).slideDown('slow');
+        }
+        
         console.log('Clicked');
         console.log(this);
     };
