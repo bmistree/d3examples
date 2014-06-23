@@ -1,6 +1,6 @@
 (function ()
 {
-    StackedGraphFactory = new StackedGrapher();    
+    StackedGraphFactory = new StackedGrapher();
     function StackedGrapher()
     { }
     StackedGrapher.prototype.params = function (div_id_to_draw_on,div_height)

@@ -47,11 +47,12 @@
               "bladder":8,
           }
       ];
-      
-      var alternate_sort_params = new AlternateSortParams(
-         "graph_id","notes_id","selector_id",300,["hotspot","conform","bladder"]);
-      var alternate_sorter = new AlternateSorter();
-      alternate_sorter.draw_alternate_sort(all_data,alternate_sort_params);
+
+      var alternate_sort_params = AlternateSorterFactory.params(
+         "graph_id","notes_id","selector_id",300,
+         ["hotspot","conform","bladder"]);
+      AlternateSorterFactory.draw_alternate_sort(
+          all_data,alternate_sort_params);
     </script>
     
   </body>
