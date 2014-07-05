@@ -5,6 +5,9 @@ function TableParams(div_id_to_draw_on,div_height)
     this.div_height = div_height;
     this.div_width = 800;
     this.cell_width = 100;
+    this.cell_width_padding = 10;
+    this.cell_height = 30;
+    this.cell_height_padding = 5;
 }
 
 
@@ -48,15 +51,32 @@ function draw_table(all_data,fields_to_draw,table_params)
     var table = d3.select('#' + table_params.div_id_to_draw_on).
         append('svg:svg').
         attr('width', table_params.div_width).
-        attr('height', stacked_params.div_height);
+        attr('height', table_params.div_height);
 
-    var data_list = convert_all_data_to_data_list(all_data);
+    var data_list = convert_all_data_to_data_list(all_data,fields_to_draw);
     
-    // // draw background rectangles
-    // bar_chart.selectAll('rect').
-    //     data(data_list).
-    //     enter().
-    //     append('svg:rect').
-    //     attr('x',
-
+    // draw background rectangles
+    table.selectAll('rect').
+        data(data_list).
+        enter().
+        append('svg:rect').
+        attr('x',
+             function (datum)
+             {
+                 var h_spacing =
+                     table_params.cell_width +
+                     table_params.cell_height_padding;
+                 return h_spacing * datum.h_index;
+             }).
+        attr('y',
+             function (datum)
+             {
+                 var v_spacing =
+                     table_params.cell_height +
+                     table_params.cell_height_padding;
+                 return v_spacing * datum.v_index;
+             }).
+        attr('height',table_params.cell_height).
+        attr('width',table_params.cell_width).
+        attr('fill','steelblue');
 }
