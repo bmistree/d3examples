@@ -58,8 +58,8 @@
       ];
 
 
-      var table_params = new TableParams("drawing_div_id",800);
-      draw_table (
+      var table_params = TableFactory.table_params("drawing_div_id",800);
+      var table = TableFactory.draw_table(
           all_data, ["hotspot","conform","bladder"],
           table_params);
       
