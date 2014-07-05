@@ -63,20 +63,55 @@ function draw_table(all_data,fields_to_draw,table_params)
         attr('x',
              function (datum)
              {
-                 var h_spacing =
-                     table_params.cell_width +
-                     table_params.cell_height_padding;
-                 return h_spacing * datum.h_index;
+                 return datum_x(datum,table_params);
              }).
         attr('y',
-             function (datum)
+             function(datum)
              {
-                 var v_spacing =
-                     table_params.cell_height +
-                     table_params.cell_height_padding;
-                 return v_spacing * datum.v_index;
+                 return datum_y(datum,table_params);
              }).
         attr('height',table_params.cell_height).
         attr('width',table_params.cell_width).
         attr('fill','steelblue');
+
+    // draw text on background rectangles
+    table.selectAll('text').
+        data(data_list).
+        enter().
+        append('svg:text').
+        attr('x',
+             function (datum)
+             {
+                 return datum_x(datum,table_params);
+             }).
+        attr('y',
+             function(datum)
+             {
+                 var v_spacing =
+                     table_params.cell_height +
+                     table_params.cell_height_padding;
+                 return datum_y(datum,table_params) + v_spacing/2.;
+             }).
+        text(function(datum)
+             {
+                 return datum.datum;
+             }).
+        attr('fill','white');
+    
+}
+
+function datum_x(datum,table_params)
+{
+    var h_spacing =
+        table_params.cell_width +
+        table_params.cell_height_padding;
+    return h_spacing * datum.h_index;
+}
+
+function datum_y(datum,table_params)
+{
+    var v_spacing =
+        table_params.cell_height +
+        table_params.cell_height_padding;
+    return v_spacing * datum.v_index;
 }
