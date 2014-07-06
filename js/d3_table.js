@@ -191,7 +191,7 @@
          if (this.visible_v_indices[v_index])
              return;
 
-         this.fields_to_draw[v_index] = true;
+         this.visible_v_indices[v_index] = true;
          
          // first part of transition, make room for new row:
          this.rectangles.transition().
@@ -216,7 +216,7 @@
                           return 'transparent';
                       
                       if (this_ptr.visible_v_indices[datum.v_index])
-                          return 'steelblue';                      
+                          return 'steelblue';
                       
                       return 'transparent';
                   }).
@@ -245,7 +245,7 @@
                           return 'transparent';
                       
                       if (this_ptr.visible_v_indices[datum.v_index])
-                          return 'steelblue';                      
+                          return 'steelblue';
                       
                       return 'transparent';
                   }).
