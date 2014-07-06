@@ -18,16 +18,29 @@
              table_params.cell_height_padding;
          return h_spacing * datum.h_index;
      }
-
-     function datum_y(datum,table_params)
+     /**
+      @param {bool} new_entry --- If new entry, use one less v_index.
+      */
+     function datum_y(datum,table_params,visible_indices,new_entry)
      {
+         var v_index = 0;
+         for (var visible_index in visible_indices)
+         {
+             var is_visible = visible_indices[visible_index];
+             if ((visible_index < datum.v_index) && (is_visible))
+                 ++v_index;
+         }
+         if (new_entry)
+             --v_index;
+         if (v_index < 0)
+             v_index = 0;
+         
          var v_spacing =
              table_params.cell_height +
              table_params.cell_height_padding;
-         return v_spacing * datum.v_index;
+         return v_spacing * v_index;
      }
 
-     
      /**
       @param {list} all_data --- Each element is an object
 
@@ -84,6 +97,9 @@
      function Table(all_data,fields_to_draw,table_params)
      {
          this.table_params = table_params;
+         // maps from ints to booleans.  true if field at v index that
+         // is key map is visible.  false if not.
+         this.visible_v_indices = {};
          this.fields_to_draw = fields_to_draw;
          this.table = d3.select('#' + table_params.div_id_to_draw_on).
              append('svg:svg').
@@ -92,8 +108,10 @@
 
          this.data_list = convert_all_data_to_data_list(all_data,fields_to_draw);
 
+         var this_ptr = this;
+         
          // draw background rectangles
-         this.table.selectAll('rect').
+         this.rectangles = this.table.selectAll('rect').
              data(this.data_list).
              enter().
              append('svg:rect').
@@ -105,16 +123,18 @@
              attr('y',
                   function(datum)
                   {
-                      return datum_y(datum,table_params);
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,false);
                   }).
              attr('height',table_params.cell_height).
              attr('width',table_params.cell_width).
              attr('fill',
-                  function()
+                  function(datum)
                   {
-                      if (Math.random() < .5)
-                          return 'transparent';
-                      return 'steelblue';
+                      if (this_ptr.visible_v_indices[datum.v_index])
+                          return 'steelblue';                      
+                      
+                      return 'transparent';
                   });
 
 
@@ -134,13 +154,119 @@
                       var v_spacing =
                           table_params.cell_height +
                           table_params.cell_height_padding;
-                      return datum_y(datum,table_params) + v_spacing/2.;
+                      
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,false) +
+                          v_spacing/2;
                   }).
              text(function(datum)
                   {
-                      return datum.datum;
+                      if (this_ptr.visible_v_indices[datum.v_index])
+                          return datum.datum;
+                      return '';
                   }).
              attr('fill','white');
 
      };
+
+     Table.prototype.insert_field = function (field_to_insert)
+     {
+         var v_index = null;
+         for (var i = 0; i < this.fields_to_draw.length; ++i)
+         {
+             var field_name = this.fields_to_draw[i];
+             if (field_name === field_to_insert)
+             {
+                 v_index = i;
+                 break;
+             }
+         }
+
+         var this_ptr = this;
+         
+         // field doesn't exist.
+         if (v_index === null)
+             return;
+         // index is already being displayed
+         if (this.visible_v_indices[v_index])
+             return;
+
+         this.fields_to_draw[v_index] = true;
+         
+         // first part of transition, make room for new row:
+         this.rectangles.transition().
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var new_entry = v_index == datum.v_index;
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,new_entry);
+                  }).
+             attr('height',table_params.cell_height).
+             attr('width',table_params.cell_width).
+             attr('fill',
+                  function(datum)
+                  {
+                      if (datum.v_index == v_index)
+                          return 'transparent';
+                      
+                      if (this_ptr.visible_v_indices[datum.v_index])
+                          return 'steelblue';                      
+                      
+                      return 'transparent';
+                  }).
+             duration(1000);
+         
+         // second part of transition, drop the new element into place
+         this.rectangles.transition().
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      // not new_entry
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,false);
+                  }).
+             attr('height',table_params.cell_height).
+             attr('width',table_params.cell_width).
+             attr('fill',
+                  function(datum)
+                  {
+                      if (datum.v_index == v_index)
+                          return 'transparent';
+                      
+                      if (this_ptr.visible_v_indices[datum.v_index])
+                          return 'steelblue';                      
+                      
+                      return 'transparent';
+                  }).
+             duration(1000);
+     };
  })();
+
+/**
+ @param {Table} table
+ @param {list} field_list
+
+ Randomly insert fields every two seconds.
+ */
+function draw_random_fields(table,field_list)
+{
+    var redraw_func = function()
+    {
+        var rand_index = Math.floor(Math.random()*field_list.length);
+        console.log('Trying to draw ' + field_list[rand_index]);
+        table.insert_field(field_list[rand_index]);
+    };
+
+    setInterval(redraw_func,4000);
+}
