@@ -19,6 +19,10 @@
 
   <body>
 
+    <div id="div_to_draw_selector_on_id">
+    </div>
+
+    
     <table>
       <tr>
         <td id="checkbox_div_id" style="vertical-align: top;">
@@ -69,11 +73,15 @@
 
 
       var table_params = TableFactory.table_params("drawing_div_id",800);
-      var field_list = ["hotspot","conform","bladder","new_field","other_field"];
+      var field_list = [
+          "hotspot","conform","bladder","new_field","other_field"];
       var table = TableFactory.draw_table(
           all_data, field_list, table_params);
       render_checkboxes("checkbox_div_id",field_list,table);
 
+      draw_sort_by_selector(
+          "div_to_draw_selector_on_id",field_list,table);
+      
       //draw_random_fields(table,field_list);
       
     </script>

@@ -1,3 +1,5 @@
+CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
+
 (function()
  {
      function TableParams(div_id_to_draw_on,div_height)
@@ -98,6 +100,11 @@
      
      function Table(all_data,fields_to_draw,table_params)
      {
+         // when have no data, do not sort initial input data objects.
+         // when presenting data, should be a string containing the
+         // field to draw
+         this.sorted_by_field = null;
+         
          this.table_params = table_params;
          // maps from ints to booleans.  true if field at v index that
          // is key map is visible.  false if not.
@@ -355,7 +362,36 @@
                   }).
              attr('fill',this_ptr.table_params.text_color).
              duration(table_params.animation_duration_ms);
-         
+
+         this.check_sort();
+     };
+
+     Table.prototype.check_sort = function()
+     {
+         console.log('enter check_sort');
+     };
+     
+     /**
+      Listen for changes to selector.
+      */
+     Table.prototype.register_selector_listener = function (selector_id)
+     {
+         var this_ptr = this;
+         $('#' + selector_id).change(
+             function()
+             {
+                 this_ptr.selector_pressed(selector_id);
+             });
+     };
+
+     /**
+      @param {Selector object} selector_element --- 
+      */
+     Table.prototype.selector_pressed = function(selector_id)
+     {
+         var prev_sorted_field = this.sorted_by_field;
+         this.sorted_by_field = $('#' + selector_id).find(':selected').text();
+         console.log('Sorted ' + this.sorted_by_field);
      };
  })();
 
@@ -379,7 +415,7 @@ function draw_random_fields(table,field_list)
     setInterval(redraw_func,1000);
 }
 
-CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
+
 
 /**
  @param {string} checkbox_div_id --- Div id for checkbox.
@@ -433,3 +469,32 @@ function generate_checkbox_list_html(obj_fields_list)
     }
     return to_return;
 }
+
+
+
+SELECTOR_ID = 'selector_id';
+
+/**
+ @param {string} div_to_draw_selector_on_id --- Div id to draw
+ selector on.
+ 
+ @param {list} obj_fields_list --- Each element is a string choose
+ which to sort by.
+
+ @param {Table} table --- table to re-sort when select different value
+ to sort by.
+ */
+function draw_sort_by_selector (
+    div_to_draw_selector_on_id,obj_fields_list,table)
+{
+    var selector_html = '<select id="' + SELECTOR_ID + '">';
+    for (var i =0; i < obj_fields_list.length; ++i)
+    {
+        var opt_value = obj_fields_list[i];
+        selector_html += '<option value="' + opt_value + '">';
+        selector_html += opt_value + '</option>';
+    }
+    
+    $('#' + div_to_draw_selector_on_id).html(selector_html);
+    table.register_selector_listener(SELECTOR_ID);
+};
