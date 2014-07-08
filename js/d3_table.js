@@ -340,3 +340,58 @@ function draw_random_fields(table,field_list)
 
     setInterval(redraw_func,1000);
 }
+
+CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
+
+/**
+ @param {string} checkbox_div_id --- Div id for checkbox.
+ @param {list} field_list --- Each element is a string
+ @param {Table} table
+ */
+function render_checkboxes(checkbox_div_id,field_list,table)
+{
+    $('#'+checkbox_div_id).html(
+        generate_checkbox_list_html(field_list));
+    add_checkbox_listeners(field_list,table);
+}
+
+function add_checkbox_listeners(obj_fields_list,table)
+{
+    for (var i=0; i < obj_fields_list.length; ++i)
+    {
+        var obj_field = obj_fields_list[i];
+        var checkbox_id = CHECKBOX_ID_PREFIX + i;
+        $('#' + checkbox_id).click(
+            checkbox_listener_factory(obj_field,table));
+    }
+}
+
+/**
+ @returns function
+ */
+function checkbox_listener_factory(obj_field,table)
+{
+    return function()
+    {
+        var is_checked = $(this).prop('checked');
+        if (is_checked)
+            table.insert_field(obj_field);
+        else
+            console.log('Unchecked ' + obj_field);
+    };
+}
+
+
+function generate_checkbox_list_html(obj_fields_list)
+{
+    var to_return = '';
+
+    for (var i = 0; i < obj_fields_list.length; ++i)
+    {
+        var obj_field = obj_fields_list[i];
+        to_return += (
+            '<input type="checkbox" id="' + CHECKBOX_ID_PREFIX + i +
+                '">' + obj_field + '<br/>');
+    }
+    return to_return;
+}

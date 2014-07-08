@@ -72,7 +72,9 @@
       var field_list = ["hotspot","conform","bladder","new_field","other_field"];
       var table = TableFactory.draw_table(
           all_data, field_list, table_params);
-      draw_random_fields(table,field_list);
+      render_checkboxes("checkbox_div_id",field_list,table);
+
+      //draw_random_fields(table,field_list);
       
     </script>
     
