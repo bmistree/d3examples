@@ -249,7 +249,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              return;
 
          this.visible_v_indices[v_index] = false;
-         this._animate_transition(v_index);
+         this._animate_transition(v_index,true);
      };
 
      /**
@@ -268,13 +268,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              return;
 
          this.visible_v_indices[v_index] = true;
-         this._animate_transition(v_index);
+         this._animate_transition(v_index,true);
      };
 
      /**
       @param {int} v_index --- Vertical index of new row to add.
+      
+      @param (optional) {bool} check_sort --- true if should run
+      check sort afterwards.
       */
-     Table.prototype._animate_transition = function(v_index)
+     Table.prototype._animate_transition = function(v_index,check_sort)
      {
          var this_ptr = this;
          // first part of transition, make room for new row:
@@ -403,12 +406,53 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   }).
              duration(table_params.animation_duration_ms);
 
-         this.check_sort();
+         if (check_sort)
+             this.check_sort();
      };
 
      Table.prototype.check_sort = function()
      {
-         console.log('enter check_sort');
+         // update h_index for data items
+
+         // key is old h_index, value is new h_index.
+         var h_index_mappings = {0:0};
+         var top_row = [];
+         for (var i = 0; i < this.data_list.length; ++i)
+         {
+             var datum = this.data_list[i];
+
+             // ignore data labels
+             if (datum.h_index == 0)
+                 continue;
+
+             if (datum.v_index == 0)
+             {
+                 top_row[datum.h_index-1] = {
+                     datum: datum.datum,
+                     h_index: datum.h_index
+                 };
+             }
+         }
+
+         top_row = top_row.sort(
+             function(a,b)
+             {
+                 return a.datum - b.datum;
+             });
+
+         for (i=0; i < top_row.length; ++i)
+         {
+             var top_row_item = top_row[i];
+             h_index_mappings[top_row_item.h_index] = i+1;
+         }
+         // re-map all data items
+         for (i = 0; i < this.data_list.length; ++i)
+         {
+             var datum = this.data_list[i];
+             datum.h_index = h_index_mappings[datum.h_index];
+         }
+         
+         this._animate_transition(-1,false);
      };
      
      /**
@@ -476,7 +520,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this.fields_to_draw.unshift(0);
          this.fields_to_draw[0] = field_to_make_top;
          // actually animate transition
-         this._animate_transition(-1);
+         this._animate_transition(-1,true);
      };
      
  })();
