@@ -212,14 +212,19 @@
              attr('fill',
                   function(datum)
                   {
-                      if (datum.v_index == v_index)
-                          return 'transparent';
-                      
-                      if (this_ptr.visible_v_indices[datum.v_index])
-                          return 'steelblue';
-                      
-                      return 'transparent';
+                      return 'steelblue';
                   }).
+             style('opacity',
+                   function (datum)
+                   {
+                       if (datum.v_index == v_index)
+                           return 0;
+                       
+                       if (this_ptr.visible_v_indices[datum.v_index])
+                           return 1.0;
+                      
+                       return 0;
+                   }).
              duration(1000);
          
          // second part of transition, drop the new element into place
@@ -241,14 +246,16 @@
              attr('fill',
                   function(datum)
                   {
-                      if (datum.v_index == v_index)
-                          return 'transparent';
-                      
-                      if (this_ptr.visible_v_indices[datum.v_index])
-                          return 'steelblue';
-                      
-                      return 'transparent';
+                      return 'steelblue';
                   }).
+             style('opacity',
+                   function (datum)
+                   {
+                       if (this_ptr.visible_v_indices[datum.v_index])
+                           return 1.0;
+                      
+                       return 0;
+                   }).
              duration(1000);
      };
  })();
@@ -261,11 +268,13 @@
  */
 function draw_random_fields(table,field_list)
 {
+    var index_to_draw_on = 5;
     var redraw_func = function()
     {
         var rand_index = Math.floor(Math.random()*field_list.length);
         console.log('Trying to draw ' + field_list[rand_index]);
         table.insert_field(field_list[rand_index]);
+        // table.insert_field(field_list[index_to_draw_on--]);
     };
 
     setInterval(redraw_func,4000);
