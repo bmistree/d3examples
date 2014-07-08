@@ -399,7 +399,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
      Table.prototype.make_top = function(field_to_make_top)
      {
-         console.log('Got into make_top');
          var v_index = this._find_v_index(field_to_make_top);
          if (v_index === null)
              return;
@@ -433,11 +432,14 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              else
                  this.visible_v_indices[v_ind] = old_val;
          }
-         console.log(this.visible_v_indices);
 
+         // re-organizing fields_to_draw so that 0 in
+         this.fields_to_draw.splice(v_index,1);
+         this.fields_to_draw.unshift(0);
+         this.fields_to_draw[0] = field_to_make_top;
+         // actually animate transition
          this._animate_transition(-1);
      };
-
      
  })();
 
