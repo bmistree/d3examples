@@ -132,12 +132,15 @@
              attr('fill',
                   function(datum)
                   {
-                      if (this_ptr.visible_v_indices[datum.v_index])
-                          return 'steelblue';                      
-                      
-                      return 'transparent';
-                  });
-
+                      return 'steelblue';                      
+                  }).
+             style('opacity',
+                   function (datum)
+                   {
+                       if (this_ptr.visible_v_indices[datum.v_index])
+                           return 1.0;
+                       return 0;
+                   });
 
          // draw text on background rectangles
          this.table.selectAll('text').
@@ -218,9 +221,8 @@
              style('opacity',
                    function (datum)
                    {
-                       if (datum.v_index == v_index)
-                           return 0;
-                       
+                       // if (datum.v_index == v_index)
+                       //     return 0;
                        if (this_ptr.visible_v_indices[datum.v_index])
                            return 1.0;
                       
@@ -279,5 +281,5 @@ function draw_random_fields(table,field_list)
         // table.insert_field(field_list[index_to_draw_on--]);
     };
 
-    setInterval(redraw_func,2000);
+    setInterval(redraw_func,1000);
 }
