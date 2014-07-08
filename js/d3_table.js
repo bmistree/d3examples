@@ -115,6 +115,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('width', table_params.div_width).
              attr('height', table_params.div_height);
 
+         // preserved so that can re-sort based on different fields
+         this.all_data = all_data;
          this.data_list = convert_all_data_to_data_list(all_data,fields_to_draw);
 
          var this_ptr = this;
@@ -392,7 +394,51 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          var prev_sorted_field = this.sorted_by_field;
          this.sorted_by_field = $('#' + selector_id).find(':selected').text();
          console.log('Sorted ' + this.sorted_by_field);
+         this.make_top(this.sorted_by_field);
      };
+
+     Table.prototype.make_top = function(field_to_make_top)
+     {
+         console.log('Got into make_top');
+         var v_index = this._find_v_index(field_to_make_top);
+         if (v_index === null)
+             return;
+
+         // run through data list and update all 
+         // elements.v_index === v_index to have 0 v_index, all
+         // elements.v_index < v_index to have one more v_index, and
+         // leave all others unchanged
+         for (var i = 0; i < this.data_list.length; ++i)
+         {
+             var datum = this.data_list[i];
+             if (datum.v_index == v_index)
+                 datum.v_index = 0;
+             else if (datum.v_index < v_index)
+                 ++ datum.v_index;
+         }
+
+         // update visible_v_indices with new indexes as well.
+         var old_visible_v_indices = this.visible_v_indices;
+         this.visible_v_indices = {};
+         for (var v_ind in old_visible_v_indices)
+         {
+             v_ind = parseInt(v_ind);
+             var old_val = old_visible_v_indices[v_ind];
+             if (v_ind === v_index)
+                 this.visible_v_indices[0] = old_val;
+             else if (v_ind < v_index)
+             {
+                 this.visible_v_indices[v_ind +1] = old_val;
+             }
+             else
+                 this.visible_v_indices[v_ind] = old_val;
+         }
+         console.log(this.visible_v_indices);
+
+         this._animate_transition(-1);
+     };
+
+     
  })();
 
 /**
