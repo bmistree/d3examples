@@ -174,21 +174,53 @@
 
      };
 
-     Table.prototype.insert_field = function (field_to_insert)
+     /**
+      @returns {int or null} --- int is vindex.  null means field_name
+      not in fields_to_draw.
+      */
+     Table.prototype._find_v_index = function(finding_field_name)
      {
          var v_index = null;
          for (var i = 0; i < this.fields_to_draw.length; ++i)
          {
              var field_name = this.fields_to_draw[i];
-             if (field_name === field_to_insert)
+             if (field_name === finding_field_name)
              {
                  v_index = i;
                  break;
              }
          }
+         return v_index;
+     };
 
+     /**
+      @param {string} field_to_remove --- Name of object field to
+      remove.
+      */
+     Table.prototype.remove_field = function (field_to_remove)
+     {
+         var v_index = this._find_v_index(field_to_remove);
          var this_ptr = this;
          
+         // field doesn't exist.
+         if (v_index === null)
+             return;
+         // index is already invisible
+         if (! this.visible_v_indices[v_index])
+             return;
+
+         this.visible_v_indices[v_index] = false;
+         this._animate_transition(v_index);
+     };
+
+     /**
+      @param {string} field_to_insert --- Name of object field to
+      draw.
+      */
+     Table.prototype.insert_field = function (field_to_insert)
+     {
+         var v_index = this._find_v_index(field_to_insert);
+         var this_ptr = this;
          // field doesn't exist.
          if (v_index === null)
              return;
@@ -197,7 +229,15 @@
              return;
 
          this.visible_v_indices[v_index] = true;
-         
+         this._animate_transition(v_index);
+     };
+
+     /**
+      @param {int} v_index --- Vertical index of new row to add.
+      */
+     Table.prototype._animate_transition = function(v_index)
+     {
+         var this_ptr = this;
          // first part of transition, make room for new row:
          this.rectangles.transition().
              attr('x',
@@ -222,8 +262,6 @@
              style('opacity',
                    function (datum)
                    {
-                       // if (datum.v_index == v_index)
-                       //     return 0;
                        if (this_ptr.visible_v_indices[datum.v_index])
                            return 1.0;
                       
@@ -377,7 +415,7 @@ function checkbox_listener_factory(obj_field,table)
         if (is_checked)
             table.insert_field(obj_field);
         else
-            console.log('Unchecked ' + obj_field);
+            table.remove_field(obj_field);
     };
 }
 
