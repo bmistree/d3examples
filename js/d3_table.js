@@ -404,10 +404,13 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   {
                       return datum.text_color;
                   }).
-             duration(table_params.animation_duration_ms);
-
-         if (check_sort)
-             this.check_sort();
+             duration(table_params.animation_duration_ms)
+         .each('end',
+               function()
+               {
+                   if (check_sort)
+                       this_ptr.check_sort();
+               });
      };
 
      Table.prototype.check_sort = function()
