@@ -12,7 +12,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this.cell_height = 30;
          this.cell_height_padding = 5;
          this.animation_duration_ms = 500;
-         this.text_color = 'white';
+         this.text_color = 'black';
+         this.color_scale = d3.scale.linear()
+             .domain([0,10])
+             .range(["white", "red"]);
      }
 
      function datum_x(datum,table_params)
@@ -50,6 +53,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
       @param {list} fields_to_draw --- Each element is a string
 
+      @param {function} color_scale --- A function that returns an
+      html color code.
+      
       @return {list} --- Each element is an object of the form:
       {
       h_index: <int>, // index of all_data
@@ -57,7 +63,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       datum: value
       }
       */
-     function convert_all_data_to_data_list(all_data,fields_to_draw)
+     function convert_all_data_to_data_list(
+         all_data,fields_to_draw,table_params)
      {
          var to_return = [];
          for (var fields_to_draw_index = 0;
@@ -71,9 +78,13 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                  var datum = all_data[data_index];
                  to_return.push(
                      {
-                         h_index: data_index,
+                         // starting horizontal index at 1 instead of 0
+                         // to accomodate row labels.
+                         h_index: data_index + 1,
                          v_index: fields_to_draw_index,
-                         datum: datum[field]
+                         datum: datum[field],
+                         bg_color: table_params.color_scale(datum[field]),
+                         text_color: table_params.text_color
                      });
              }
          }
@@ -117,8 +128,24 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
          // preserved so that can re-sort based on different fields
          this.all_data = all_data;
-         this.data_list = convert_all_data_to_data_list(all_data,fields_to_draw);
-
+         this.data_list =
+             convert_all_data_to_data_list(
+                 all_data,fields_to_draw,table_params);
+         
+         // add row labels
+         for (var i = 0; i < this.fields_to_draw.length; ++i)
+         {
+             var field_name = this.fields_to_draw[i];
+             var label_data_item = {
+                 h_index: 0,
+                 v_index: i,
+                 datum: field_name,
+                 bg_color: '#a0a0a0',
+                 text_color: 'white'
+             };
+             this.data_list.push(label_data_item);
+         }
+         
          var this_ptr = this;
          
          // draw background rectangles
@@ -142,7 +169,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('fill',
                   function(datum)
                   {
-                      return 'steelblue';                      
+                      return datum.bg_color;
                   }).
              style('opacity',
                    function (datum)
@@ -179,8 +206,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           return datum.datum;
                       return '';
                   }).
-             attr('fill',this_ptr.table_params.text_color);
-
+             attr('fill',
+                  function(datum)
+                  {
+                      return datum.text_color;
+                  });
      };
 
      /**
@@ -266,7 +296,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('fill',
                   function(datum)
                   {
-                      return 'steelblue';
+                      return datum.bg_color;
                   }).
              style('opacity',
                    function (datum)
@@ -303,7 +333,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           return datum.datum;
                       return '';
                   }).
-             attr('fill',this_ptr.table_params.text_color).
+             attr('fill',
+                  function(datum)
+                  {
+                      return datum.text_color;
+                  }).
              duration(table_params.animation_duration_ms);
 
          
@@ -326,7 +360,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('fill',
                   function(datum)
                   {
-                      return 'steelblue';
+                      return datum.bg_color;
                   }).
              style('opacity',
                    function (datum)
@@ -362,7 +396,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           return datum.datum;
                       return '';
                   }).
-             attr('fill',this_ptr.table_params.text_color).
+             attr('fill',
+                  function(datum)
+                  {
+                      return datum.text_color;
+                  }).
              duration(table_params.animation_duration_ms);
 
          this.check_sort();
