@@ -10,6 +10,7 @@
          this.cell_height = 30;
          this.cell_height_padding = 5;
          this.animation_duration_ms = 500;
+         this.text_color = 'white';
      }
 
      function datum_x(datum,table_params)
@@ -143,7 +144,7 @@
                    });
 
          // draw text on background rectangles
-         this.table.selectAll('text').
+         this.texts = this.table.selectAll('text').
              data(this.data_list).
              enter().
              append('svg:text').
@@ -169,7 +170,7 @@
                           return datum.datum;
                       return '';
                   }).
-             attr('fill','white');
+             attr('fill',this_ptr.table_params.text_color);
 
      };
 
@@ -230,6 +231,34 @@
                    }).
              duration(table_params.animation_duration_ms);
 
+         // draw text
+         this.texts.transition().
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+
+                      var new_entry = v_index == datum.v_index;
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,new_entry) +
+                          v_spacing/2;
+                  }).
+             text(function(datum)
+                  {
+                      if (this_ptr.visible_v_indices[datum.v_index])
+                          return datum.datum;
+                      return '';
+                  }).
+             attr('fill',this_ptr.table_params.text_color).
+             duration(table_params.animation_duration_ms);
+
          
          // second part of transition, drop the new element into place
          this.rectangles.transition().
@@ -261,6 +290,34 @@
                        return 0;
                    }).
              duration(table_params.animation_duration_ms);
+
+         // draws texts
+         this.texts.transition().
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,false) +
+                          v_spacing/2;
+                  }).
+             text(function(datum)
+                  {
+                      if (this_ptr.visible_v_indices[datum.v_index])
+                          return datum.datum;
+                      return '';
+                  }).
+             attr('fill',this_ptr.table_params.text_color).
+             duration(table_params.animation_duration_ms);
+         
      };
  })();
 
