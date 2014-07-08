@@ -9,6 +9,7 @@
          this.cell_width_padding = 10;
          this.cell_height = 30;
          this.cell_height_padding = 5;
+         this.animation_duration_ms = 500;
      }
 
      function datum_x(datum,table_params)
@@ -225,7 +226,8 @@
                       
                        return 0;
                    }).
-             duration(1000);
+             duration(table_params.animation_duration_ms);
+
          
          // second part of transition, drop the new element into place
          this.rectangles.transition().
@@ -256,7 +258,7 @@
                       
                        return 0;
                    }).
-             duration(1000);
+             duration(table_params.animation_duration_ms);
      };
  })();
 
@@ -277,5 +279,5 @@ function draw_random_fields(table,field_list)
         // table.insert_field(field_list[index_to_draw_on--]);
     };
 
-    setInterval(redraw_func,4000);
+    setInterval(redraw_func,2000);
 }
