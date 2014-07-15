@@ -2,8 +2,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
 (function()
  {
-     function TableParams(div_id_to_draw_on,div_height)
+     function TableParams(div_id_to_draw_on,div_height,url_to_remove_icon)
      {
+         this.url_to_remove_icon = url_to_remove_icon;
          this.div_id_to_draw_on = div_id_to_draw_on;
          this.div_height = div_height;
          this.div_width = 800;
@@ -23,7 +24,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          var h_spacing =
              table_params.cell_width +
              table_params.cell_height_padding;
-         return h_spacing * datum.h_index;
+         var adjust = 0;
+         if (datum.h_index === 0)
+             adjust += 30;
+         return h_spacing * datum.h_index + adjust;
      }
      /**
       @param {bool} new_entry --- If new entry, use one less v_index.
@@ -78,9 +82,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                  var datum = all_data[data_index];
                  to_return.push(
                      {
-                         // starting horizontal index at 1 instead of 0
-                         // to accomodate row labels.
-                         h_index: data_index + 1,
+                         // starting horizontal index at 2 instead of 0
+                         // to accomodate row labels and kill rows.
+                         h_index: data_index + 2,
                          v_index: fields_to_draw_index,
                          datum: datum[field],
                          bg_color: table_params.color_scale(datum[field]),
@@ -96,9 +100,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      { }
 
      Tabler.prototype.table_params = function(
-         div_id_to_draw_on,div_height)
+         div_id_to_draw_on,div_height,url_to_remove_icon)
      {
-         return new TableParams(div_id_to_draw_on,div_height);
+         return new TableParams(
+             div_id_to_draw_on,div_height,url_to_remove_icon);
      };
      
      Tabler.prototype.draw_table = function(
@@ -137,7 +142,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          {
              var field_name = this.fields_to_draw[i];
              var label_data_item = {
-                 h_index: 0,
+                 h_index: 1,
                  v_index: i,
                  datum: field_name,
                  bg_color: '#a0a0a0',
@@ -145,6 +150,20 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              };
              this.data_list.push(label_data_item);
          }
+
+         // add category remove buttons
+         for (i = 0; i < this.fields_to_draw.length; ++i)
+         {
+             var field_name = this.fields_to_draw[i];
+             var label_data_item = {
+                 h_index: 0,
+                 v_index: i,
+                 datum: '',
+                 bg_color: '#a0a0a0',
+                 text_color: 'white'
+             };
+             this.data_list.push(label_data_item);
+         }         
          
          var this_ptr = this;
          
@@ -174,6 +193,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
+                       if (datum.h_index === 0)
+                           return 0;
+                       
                        if (this_ptr.visible_v_indices[datum.v_index])
                            return 1.0;
                        return 0;
@@ -211,6 +233,44 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   {
                       return datum.text_color;
                   });
+
+         
+         this.kill_imgs = this.table.selectAll('image').
+             data(this.data_list).
+             enter().
+             append('svg:image').
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+                      
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,false) +
+                          v_spacing/2;
+                  }).
+             text(function(datum)
+                  {
+                      if (this_ptr.visible_v_indices[datum.v_index])
+                          return datum.datum;
+                      return '';
+                  }).
+             attr('xlink:href',table_params.url_to_remove_icon).
+             style('opacity',
+                   function (datum)
+                   {
+                       if ((datum.h_index === 0) &&
+                           (this_ptr.visible_v_indices[datum.v_index]))
+                           return 1.0;
+                       return 0;
+                   });
+         
      };
 
      /**
@@ -304,6 +364,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
+                       if (datum.h_index === 0)
+                           return 0;
+                       
                        if (this_ptr.visible_v_indices[datum.v_index])
                            return 1.0;
                       
@@ -343,6 +406,37 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   }).
              duration(table_params.animation_duration_ms);
 
+         this.kill_imgs.transition().
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+
+                      var new_entry = v_index == datum.v_index;
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,new_entry);
+                  }).
+             attr('height',table_params.cell_height).
+             attr('width',table_params.cell_width).
+             attr('xlink:href',table_params.url_to_remove_icon).
+             style('opacity',
+                   function (datum)
+                   {
+                       if ((datum.h_index === 0) &&
+                           (this_ptr.visible_v_indices[datum.v_index]))
+                           return 1.0;
+
+                       return 0;
+                   }).
+             duration(table_params.animation_duration_ms);
+
          
          // second part of transition, drop the new element into place
          this.rectangles.transition().
@@ -368,13 +462,46 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
+                       if (datum.h_index === 0)
+                           return 0;
+                       
                        if (this_ptr.visible_v_indices[datum.v_index])
                            return 1.0;
-                      
                        return 0;
                    }).
              duration(table_params.animation_duration_ms);
 
+         this.kill_imgs.transition().
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+
+                      return datum_y(datum,table_params,
+                                    this_ptr.visible_v_indices,false);
+                  }).
+             attr('height',table_params.cell_height).
+             attr('width',table_params.cell_width).
+             attr('xlink:href',table_params.url_to_remove_icon).
+             style('opacity',
+                   function (datum)
+                   {
+                       if ((datum.h_index === 0) &&
+                           (this_ptr.visible_v_indices[datum.v_index]))
+                           return 1.0;
+
+                       return 0;
+                   }).
+             duration(table_params.animation_duration_ms);
+
+         
          // draws texts
          this.texts.transition().
              attr('x',
@@ -411,6 +538,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                    if (check_sort)
                        this_ptr.check_sort();
                });
+         
      };
 
      Table.prototype.check_sort = function()
