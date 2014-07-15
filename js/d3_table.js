@@ -568,10 +568,23 @@ function add_checkbox_listeners(obj_fields_list,table)
     {
         var obj_field = obj_fields_list[i];
         var checkbox_id = CHECKBOX_ID_PREFIX + i;
-        $('#' + checkbox_id).click(
-            checkbox_listener_factory(obj_field,table));
+        $('#'+checkbox_id).click(
+            button_clicked_listener_factory(obj_field,table));
     }
 }
+
+/**
+ @returns function
+ */
+function button_clicked_listener_factory(obj_field,table)
+{
+    return function()
+    {
+        table.insert_field(obj_field);
+        $(this).remove();
+    };
+}
+
 
 /**
  @returns function
@@ -592,13 +605,12 @@ function checkbox_listener_factory(obj_field,table)
 function generate_checkbox_list_html(obj_fields_list)
 {
     var to_return = '';
-
     for (var i = 0; i < obj_fields_list.length; ++i)
     {
         var obj_field = obj_fields_list[i];
         to_return += (
-            '<input type="checkbox" id="' + CHECKBOX_ID_PREFIX + i +
-                '">' + obj_field + '<br/>');
+            '<button id="' + CHECKBOX_ID_PREFIX + i +
+                '">' + obj_field + '</button>&nbsp&nbsp&nbsp');
     }
     return to_return;
 }
