@@ -771,7 +771,7 @@ function generate_checkbox_list_html(obj_fields_list)
 
 function single_button_element_html(obj_field,index)
 {    
-    return '&nbsp&nbsp&nbsp<button id="' + CHECKBOX_ID_PREFIX + index +
+    return '<button id="' + CHECKBOX_ID_PREFIX + index +
         '">' + obj_field + '</button>';
 }
 

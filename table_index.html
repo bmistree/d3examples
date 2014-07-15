@@ -17,21 +17,19 @@
     
   </head>
 
-  <body>
+  <body >
 
     <div id="div_to_draw_selector_on_id">
     </div>
 
+    <div id="checkbox_div_id">
+    </div>
+
+    <br/>
+    <div id="drawing_div_id">
+    </div>
     
-    <table cellpadding="10">
-      <tr>
-        <td id="checkbox_div_id" style="vertical-align: top;">
-        </td>
-        <td id="drawing_div_id">
-        </td>
-      </tr>
-    </table>
-        
+    
     <script>
       var all_data = [
           {
@@ -75,7 +73,8 @@
       var table_params =
           TableFactory.table_params(
               "drawing_div_id",800,
-              "img/glyphicons_197_remove.png");
+              "img/gray_remove.png");
+      //"img/glyphicons_197_remove.png");
 
       var field_list = [
           "hotspot","conform","bladder","new_field","other_field"];
