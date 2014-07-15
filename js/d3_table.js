@@ -209,7 +209,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params);
+                      return datum_x(datum,table_params) + 10;
                   }).
              attr('y',
                   function(datum)
@@ -379,7 +379,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params);
+                      return datum_x(datum,table_params) + 10;;
                   }).
              attr('y',
                   function(datum)
@@ -501,13 +501,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                    }).
              duration(table_params.animation_duration_ms);
 
-         
          // draws texts
          this.texts.transition().
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params);
+                      return datum_x(datum,table_params) + 10;;
                   }).
              attr('y',
                   function(datum)
