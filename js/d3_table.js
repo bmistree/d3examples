@@ -315,12 +315,28 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          // field doesn't exist.
          if (v_index === null)
              return;
+         
          // index is already invisible
          if (! this.visible_v_indices[v_index])
              return;
 
          this.visible_v_indices[v_index] = false;
          this._animate_transition(v_index,true);
+         
+         for (var i = 0; i < this.obj_fields_list.length; ++i)
+         {
+             var obj_field = this.obj_fields_list[i];
+             if (obj_field !== field_to_remove)
+                 continue;
+
+             var new_button_html = single_button_element_html(
+                 obj_field,i);
+             $('#' + this.checkbox_div_id).append(new_button_html);
+
+             var checkbox_id = CHECKBOX_ID_PREFIX + i;
+             $('#'+checkbox_id).click(
+                 button_clicked_listener_factory(obj_field,this));
+         }
      };
 
      /**
@@ -697,6 +713,8 @@ function render_checkboxes(checkbox_div_id,field_list,table)
 {
     $('#'+checkbox_div_id).html(
         generate_checkbox_list_html(field_list));
+    table.checkbox_div_id = checkbox_div_id;
+    table.obj_fields_list = field_list;
     add_checkbox_listeners(field_list,table);
 }
 
@@ -746,11 +764,15 @@ function generate_checkbox_list_html(obj_fields_list)
     for (var i = 0; i < obj_fields_list.length; ++i)
     {
         var obj_field = obj_fields_list[i];
-        to_return += (
-            '<button id="' + CHECKBOX_ID_PREFIX + i +
-                '">' + obj_field + '</button>&nbsp&nbsp&nbsp');
+        to_return += single_button_element_html(obj_field,i);
     }
     return to_return;
+}
+
+function single_button_element_html(obj_field,index)
+{    
+    return '&nbsp&nbsp&nbsp<button id="' + CHECKBOX_ID_PREFIX + index +
+        '">' + obj_field + '</button>';
 }
 
 
