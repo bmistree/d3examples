@@ -159,6 +159,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                  h_index: 0,
                  v_index: i,
                  datum: '',
+                 field_name: field_name,
                  bg_color: '#a0a0a0',
                  text_color: 'white'
              };
@@ -269,7 +270,17 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                            (this_ptr.visible_v_indices[datum.v_index]))
                            return 1.0;
                        return 0;
-                   });
+                   }).
+             on('click',
+                function(datum)
+                {
+                    // only want to set click handler for icons we're displaying
+                    if ((datum.h_index === 0) &&
+                        (this_ptr.visible_v_indices[datum.v_index]))
+                    {
+                        this_ptr.remove_field(datum.field_name);
+                    }
+                });
          
      };
 
