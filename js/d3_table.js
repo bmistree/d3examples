@@ -315,7 +315,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
              if (datum.visible)
              {
-                 if (datum.v_index > datum.v_index)
+                 if (datum.v_index > v_index)
                      --datum.v_index;
              }
          }
