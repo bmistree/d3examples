@@ -430,6 +430,29 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      {
          var this_ptr = this;
          // first part of transition, make room for new row:
+         this.headers_texts.transition().
+             attr('x',
+                  function (datum,i)
+                  {
+                      return datum_x(header_convert(i),table_params) + 10;
+                  }).
+             attr('y',
+                  function(datum,i)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+                      
+                      return datum_y(header_convert(i),table_params,false) +
+                          v_spacing/2;
+                  }).
+             text(function(datum)
+                  {
+                      return datum;
+                  }).
+             duration(this_ptr.table_params.animation_duration_ms);
+
+         
          this.rectangles.transition().
              attr('x',
                   function (datum)
@@ -674,6 +697,15 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              if (datum.h_index in h_index_mappings)
                  datum.h_index = h_index_mappings[datum.h_index];
          }
+
+         for (i = 0; i < this.column_headers.length; ++i)
+         {
+             console.log('Remapping');
+             var item = this.column_headers[i];
+             if (item.h_index in h_index_mappings)
+                 item.h_index = h_index_mappings[item.h_index];
+         }
+
          
          this._animate_transition(-1,false);
      };
