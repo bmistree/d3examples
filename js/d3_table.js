@@ -194,7 +194,14 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                        if (datum.visible)
                            return 1.0;
                        return 0;
-                   });
+                   }).
+             on('click',
+                function(datum)
+                {
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        this_ptr.make_top(datum.field_name);
+                });
 
 
          // draw text on background rectangles
@@ -227,8 +234,15 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   function(datum)
                   {
                       return datum.text_color;
-                  });
-
+                  }).
+             on('click',
+                function(datum)
+                {
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        this_ptr.make_top(datum.field_name);
+                });
+         
          
          this.kill_imgs = this.table.selectAll('image').
              data(this.data_list).
@@ -269,6 +283,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                     // only want to set click handler for icons we're displaying
                     if ((datum.h_index === 0) && datum.visible)
                         this_ptr.remove_field(datum.field_name);
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        this_ptr.make_top(datum.field_name);
                 });
          
      };
