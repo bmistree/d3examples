@@ -281,7 +281,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          for (var i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             if ((datum.h_index === 1) && (finding_field_name === datum.field))
+             if ((datum.h_index === 1) && (finding_field_name === datum.field_name))
              {
                  if (datum.visible)
                      return datum.v_index;
