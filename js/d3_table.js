@@ -395,16 +395,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params);
+                      return datum_x(datum,this_ptr.table_params);
                   }).
              attr('y',
                   function(datum)
                   {
                       var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,table_params,new_entry);
+                      return datum_y(datum,this_ptr.table_params,new_entry);
                   }).
-             attr('height',table_params.cell_height).
-             attr('width',table_params.cell_width).
+             attr('height',this_ptr.table_params.cell_height).
+             attr('width',this_ptr.table_params.cell_width).
              attr('fill',
                   function(datum)
                   {
@@ -421,24 +421,24 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                       
                        return 0;
                    }).
-             duration(table_params.animation_duration_ms);
+             duration(this_ptr.table_params.animation_duration_ms);
 
          // draw text
          this.texts.transition().
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params) + 10;;
+                      return datum_x(datum,this_ptr.table_params) + 10;;
                   }).
              attr('y',
                   function(datum)
                   {
                       var v_spacing =
-                          table_params.cell_height +
-                          table_params.cell_height_padding;
+                          this_ptr.table_params.cell_height +
+                          this_ptr.table_params.cell_height_padding;
 
                       var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,table_params,new_entry) +
+                      return datum_y(datum,this_ptr.table_params,new_entry) +
                           v_spacing/2;
                   }).
              text(function(datum)
@@ -452,27 +452,27 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   {
                       return datum.text_color;
                   }).
-             duration(table_params.animation_duration_ms);
+             duration(this_ptr.table_params.animation_duration_ms);
 
          this.kill_imgs.transition().
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params);
+                      return datum_x(datum,this_ptr.table_params);
                   }).
              attr('y',
                   function(datum)
                   {
                       var v_spacing =
-                          table_params.cell_height +
-                          table_params.cell_height_padding;
+                          this_ptr.table_params.cell_height +
+                          this_ptr.table_params.cell_height_padding;
 
                       var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,table_params,new_entry);
+                      return datum_y(datum,this_ptr.table_params,new_entry);
                   }).
-             attr('height',table_params.cell_height).
-             attr('width',table_params.cell_width).
-             attr('xlink:href',table_params.url_to_remove_icon).
+             attr('height',this_ptr.table_params.cell_height).
+             attr('width',this_ptr.table_params.cell_width).
+             attr('xlink:href',this_ptr.table_params.url_to_remove_icon).
              style('opacity',
                    function (datum)
                    {
@@ -481,7 +481,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
                        return 0;
                    }).
-             duration(table_params.animation_duration_ms);
+             duration(this_ptr.table_params.animation_duration_ms);
 
          
          // second part of transition, drop the new element into place
@@ -489,16 +489,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params);
+                      return datum_x(datum,this_ptr.table_params);
                   }).
              attr('y',
                   function(datum)
                   {
                       // not new_entry
-                      return datum_y(datum,table_params,false);
+                      return datum_y(datum,this_ptr.table_params,false);
                   }).
-             attr('height',table_params.cell_height).
-             attr('width',table_params.cell_width).
+             attr('height',this_ptr.table_params.cell_height).
+             attr('width',this_ptr.table_params.cell_width).
              attr('fill',
                   function(datum)
                   {
@@ -514,26 +514,26 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                            return 1.0;
                        return 0;
                    }).
-             duration(table_params.animation_duration_ms);
+             duration(this_ptr.table_params.animation_duration_ms);
 
          this.kill_imgs.transition().
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params);
+                      return datum_x(datum,this_ptr.table_params);
                   }).
              attr('y',
                   function(datum)
                   {
                       var v_spacing =
-                          table_params.cell_height +
-                          table_params.cell_height_padding;
+                          this_ptr.table_params.cell_height +
+                          this_ptr.table_params.cell_height_padding;
 
-                      return datum_y(datum,table_params,false);
+                      return datum_y(datum,this_ptr.table_params,false);
                   }).
-             attr('height',table_params.cell_height).
-             attr('width',table_params.cell_width).
-             attr('xlink:href',table_params.url_to_remove_icon).
+             attr('height',this_ptr.table_params.cell_height).
+             attr('width',this_ptr.table_params.cell_width).
+             attr('xlink:href',this_ptr.table_params.url_to_remove_icon).
              style('opacity',
                    function (datum)
                    {
@@ -542,23 +542,23 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
                        return 0;
                    }).
-             duration(table_params.animation_duration_ms);
+             duration(this_ptr.table_params.animation_duration_ms);
 
          // draws texts
          this.texts.transition().
              attr('x',
                   function (datum)
                   {
-                      return datum_x(datum,table_params) + 10;;
+                      return datum_x(datum,this_ptr.table_params) + 10;;
                   }).
              attr('y',
                   function(datum)
                   {
                       var v_spacing =
-                          table_params.cell_height +
-                          table_params.cell_height_padding;
+                          this_ptr.table_params.cell_height +
+                          this_ptr.table_params.cell_height_padding;
 
-                      return datum_y(datum,table_params,false) +
+                      return datum_y(datum,this_ptr.table_params,false) +
                           v_spacing/2;
                   }).
              text(function(datum)
@@ -572,7 +572,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   {
                       return datum.text_color;
                   }).
-             duration(table_params.animation_duration_ms)
+             duration(this_ptr.table_params.animation_duration_ms)
          .each('end',
                function()
                {
