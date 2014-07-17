@@ -21,6 +21,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
      function datum_x(datum,table_params)
      {
+         if (! datum.visible)
+             return 0;
+         
          var h_spacing =
              table_params.cell_width +
              table_params.cell_height_padding;
@@ -264,9 +267,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                 {
                     // only want to set click handler for icons we're displaying
                     if ((datum.h_index === 0) && datum.visible)
-                    {
                         this_ptr.remove_field(datum.field_name);
-                    }
                 });
          
      };
@@ -352,7 +353,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              var datum = this.data_list[i];
 
              if (datum.field_name === field_to_insert)
-             {
+             {                 
                  datum.visible = true;
                  datum.v_index = v_index;
              }
