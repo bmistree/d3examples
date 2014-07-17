@@ -31,6 +31,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          if (datum.h_index === 0)
              adjust += 30;
          var to_return = h_spacing * datum.h_index + adjust;
+
          return to_return;
      }
      /**
@@ -566,8 +567,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
      Table.prototype.check_sort = function()
      {
-         // update h_index for data items
+         // update h_index for data items... sort by fields that are
+         // visible and have v_index = 0;
 
+         // how many columns before data begins.
+         var data_col_offset = 2;
+         
          // key is old h_index, value is new h_index.
          var h_index_mappings = {0:0};
          var top_row = [];
@@ -579,12 +584,17 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              if (datum.h_index == 0)
                  continue;
 
-             if (datum.v_index == 0)
+             // FIXME: note: shouldn't hard code 2 here.  Using it so
+             // that only sort h_indices that don't include kill
+             // button or row label.
+             if ((datum.v_index == 0) && datum.visible &&
+                 (datum.h_index >= data_col_offset))
              {
-                 top_row[datum.h_index-1] = {
-                     datum: datum.datum,
-                     h_index: datum.h_index
-                 };
+                 top_row.push(
+                     {
+                         datum: datum.datum,
+                         h_index: datum.h_index
+                     });
              }
          }
 
@@ -597,13 +607,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          for (i=0; i < top_row.length; ++i)
          {
              var top_row_item = top_row[i];
-             h_index_mappings[top_row_item.h_index] = i+1;
+             h_index_mappings[top_row_item.h_index] = i+data_col_offset;
          }
          // re-map all data items
          for (i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             datum.h_index = h_index_mappings[datum.h_index];
+             // checking because kill button col and label col are not
+             // in h_index_mappings.
+             if (datum.h_index in h_index_mappings)
+                 datum.h_index = h_index_mappings[datum.h_index];
          }
          
          this._animate_transition(-1,false);
