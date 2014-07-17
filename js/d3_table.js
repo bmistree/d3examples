@@ -27,20 +27,15 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          var adjust = 0;
          if (datum.h_index === 0)
              adjust += 30;
-         return h_spacing * datum.h_index + adjust;
+         var to_return = h_spacing * datum.h_index + adjust;
+         return to_return;
      }
      /**
       @param {bool} new_entry --- If new entry, use one less v_index.
       */
-     function datum_y(datum,table_params,visible_indices,new_entry)
+     function datum_y(datum,table_params,new_entry)
      {
-         var v_index = 0;
-         for (var visible_index in visible_indices)
-         {
-             var is_visible = visible_indices[visible_index];
-             if ((visible_index < datum.v_index) && (is_visible))
-                 ++v_index;
-         }
+         var v_index = datum.v_index;
          if (new_entry)
              --v_index;
          if (v_index < 0)
@@ -62,9 +57,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       
       @return {list} --- Each element is an object of the form:
       {
-      h_index: <int>, // index of all_data
-      v_index: <int>, // index of fields_to_draw
-      datum: value
+          h_index: <int>, // index of all_data
+          v_index: <int>, // index of fields_to_draw
+          datum: value,
+          visible: <bool>, // whether or not this field is visible
+          bg_color: <string>,
+          text_color: <string>
       }
       */
      function convert_all_data_to_data_list(
@@ -76,6 +74,30 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
               ++fields_to_draw_index)
          {
              var field = fields_to_draw[fields_to_draw_index];
+
+             var row_name_datum = {
+                 h_index: 1,
+                 v_index: -1,
+                 datum: field,
+                 bg_color: '#a0a0a0',
+                 text_color: 'white',
+                 visible: false,
+                 field_name: field
+                 };
+             var kill_row_datum = {
+                 h_index: 0,
+                 v_index: -1,
+                 datum: '',
+                 bg_color: '#a0a0a0',
+                 text_color: 'white',
+                 visible: false,
+                 field_name: field
+             };
+
+             to_return.push(row_name_datum);
+             to_return.push(kill_row_datum);
+
+             // now insert actual data
              for (var data_index = 0; data_index < all_data.length;
                   ++data_index)
              {
@@ -85,10 +107,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                          // starting horizontal index at 2 instead of 0
                          // to accomodate row labels and kill rows.
                          h_index: data_index + 2,
-                         v_index: fields_to_draw_index,
+                         v_index: -1,
                          datum: datum[field],
                          bg_color: table_params.color_scale(datum[field]),
-                         text_color: table_params.text_color
+                         text_color: table_params.text_color,
+                         visible: false,
+                         field_name: field
                      });
              }
          }
@@ -120,11 +144,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          // when presenting data, should be a string containing the
          // field to draw
          this.sorted_by_field = null;
+
+         this.next_row_index = 0;
          
          this.table_params = table_params;
-         // maps from ints to booleans.  true if field at v index that
-         // is key map is visible.  false if not.
-         this.visible_v_indices = {};
          this.fields_to_draw = fields_to_draw;
          this.table = d3.select('#' + table_params.div_id_to_draw_on).
              append('svg:svg').
@@ -137,37 +160,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              convert_all_data_to_data_list(
                  all_data,fields_to_draw,table_params);
          
-         // add row labels
-         for (var i = 0; i < this.fields_to_draw.length; ++i)
-         {
-             var field_name = this.fields_to_draw[i];
-             var label_data_item = {
-                 h_index: 1,
-                 v_index: i,
-                 datum: field_name,
-                 bg_color: '#a0a0a0',
-                 text_color: 'white'
-             };
-             this.data_list.push(label_data_item);
-         }
-
-         // add category remove buttons
-         for (i = 0; i < this.fields_to_draw.length; ++i)
-         {
-             var field_name = this.fields_to_draw[i];
-             var label_data_item = {
-                 h_index: 0,
-                 v_index: i,
-                 datum: '',
-                 field_name: field_name,
-                 bg_color: '#a0a0a0',
-                 text_color: 'white'
-             };
-             this.data_list.push(label_data_item);
-         }         
-         
          var this_ptr = this;
-         
+
          // draw background rectangles
          this.rectangles = this.table.selectAll('rect').
              data(this.data_list).
@@ -181,8 +175,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('y',
                   function(datum)
                   {
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,false);
+                      return datum_y(datum,table_params,false);
                   }).
              attr('height',table_params.cell_height).
              attr('width',table_params.cell_width).
@@ -194,13 +187,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
-                       if (datum.h_index === 0)
-                           return 0;
-                       
-                       if (this_ptr.visible_v_indices[datum.v_index])
+                       if (datum.visible)
                            return 1.0;
                        return 0;
                    });
+
 
          // draw text on background rectangles
          this.texts = this.table.selectAll('text').
@@ -219,13 +210,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           table_params.cell_height +
                           table_params.cell_height_padding;
                       
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,false) +
+                      return datum_y(datum,table_params,false) +
                           v_spacing/2;
                   }).
              text(function(datum)
                   {
-                      if (this_ptr.visible_v_indices[datum.v_index])
+                      if (datum.visible)
                           return datum.datum;
                       return '';
                   }).
@@ -252,13 +242,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           table_params.cell_height +
                           table_params.cell_height_padding;
                       
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,false) +
+                      return datum_y(datum,table_params,false) +
                           v_spacing/2;
                   }).
              text(function(datum)
                   {
-                      if (this_ptr.visible_v_indices[datum.v_index])
+                      if (datum.visible)
                           return datum.datum;
                       return '';
                   }).
@@ -266,8 +255,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
-                       if ((datum.h_index === 0) &&
-                           (this_ptr.visible_v_indices[datum.v_index]))
+                       if ((datum.h_index === 0) && datum.visible)
                            return 1.0;
                        return 0;
                    }).
@@ -275,8 +263,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                 function(datum)
                 {
                     // only want to set click handler for icons we're displaying
-                    if ((datum.h_index === 0) &&
-                        (this_ptr.visible_v_indices[datum.v_index]))
+                    if ((datum.h_index === 0) && datum.visible)
                     {
                         this_ptr.remove_field(datum.field_name);
                     }
@@ -290,17 +277,17 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       */
      Table.prototype._find_v_index = function(finding_field_name)
      {
-         var v_index = null;
-         for (var i = 0; i < this.fields_to_draw.length; ++i)
+         for (var i = 0; i < this.data_list.length; ++i)
          {
-             var field_name = this.fields_to_draw[i];
-             if (field_name === finding_field_name)
+             var datum = this.data_list[i];
+             if ((datum.h_index === 1) && (finding_field_name === datum.field))
              {
-                 v_index = i;
-                 break;
+                 if (datum.visible)
+                     return datum.v_index;
+                 return null;
              }
          }
-         return v_index;
+         return null;
      };
 
      /**
@@ -315,15 +302,28 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          // field doesn't exist.
          if (v_index === null)
              return;
-         
-         // index is already invisible
-         if (! this.visible_v_indices[v_index])
-             return;
 
-         this.visible_v_indices[v_index] = false;
+         for (var i =0; i < this.data_list.length; ++i)
+         {
+             var datum = this.data_list[i];
+             if (datum.v_index == v_index)
+             {
+                 datum.v_index = -1;
+                 datum.visible = false;
+             }
+
+             if (datum.visible)
+             {
+                 if (datum.v_index > datum.v_index)
+                     --datum.v_index;
+             }
+         }
+
+         --this.next_row_index;
          this._animate_transition(v_index,true);
-         
-         for (var i = 0; i < this.obj_fields_list.length; ++i)
+
+         // draw the button again.
+         for (i = 0; i < this.obj_fields_list.length; ++i)
          {
              var obj_field = this.obj_fields_list[i];
              if (obj_field !== field_to_remove)
@@ -345,19 +345,23 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       */
      Table.prototype.insert_field = function (field_to_insert)
      {
-         var v_index = this._find_v_index(field_to_insert);
-         var this_ptr = this;
-         // field doesn't exist.
-         if (v_index === null)
-             return;
-         // index is already being displayed
-         if (this.visible_v_indices[v_index])
-             return;
+         var v_index = this.next_row_index++;
 
-         this.visible_v_indices[v_index] = true;
+         for (var i =0; i < this.data_list.length; ++i)
+         {
+             var datum = this.data_list[i];
+
+             if (datum.field_name === field_to_insert)
+             {
+                 datum.visible = true;
+                 datum.v_index = v_index;
+             }
+         }
+         
          this._animate_transition(v_index,true);
      };
 
+         
      /**
       @param {int} v_index --- Vertical index of new row to add.
       
@@ -378,8 +382,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   function(datum)
                   {
                       var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,new_entry);
+                      return datum_y(datum,table_params,new_entry);
                   }).
              attr('height',table_params.cell_height).
              attr('width',table_params.cell_width).
@@ -394,7 +397,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                        if (datum.h_index === 0)
                            return 0;
                        
-                       if (this_ptr.visible_v_indices[datum.v_index])
+                       if (datum.visible)
                            return 1.0;
                       
                        return 0;
@@ -416,13 +419,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           table_params.cell_height_padding;
 
                       var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,new_entry) +
+                      return datum_y(datum,table_params,new_entry) +
                           v_spacing/2;
                   }).
              text(function(datum)
                   {
-                      if (this_ptr.visible_v_indices[datum.v_index])
+                      if (datum.visible)
                           return datum.datum;
                       return '';
                   }).
@@ -447,8 +449,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           table_params.cell_height_padding;
 
                       var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,new_entry);
+                      return datum_y(datum,table_params,new_entry);
                   }).
              attr('height',table_params.cell_height).
              attr('width',table_params.cell_width).
@@ -456,8 +457,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
-                       if ((datum.h_index === 0) &&
-                           (this_ptr.visible_v_indices[datum.v_index]))
+                       if ((datum.h_index === 0) && datum.visible)
                            return 1.0;
 
                        return 0;
@@ -476,8 +476,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   function(datum)
                   {
                       // not new_entry
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,false);
+                      return datum_y(datum,table_params,false);
                   }).
              attr('height',table_params.cell_height).
              attr('width',table_params.cell_width).
@@ -492,7 +491,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                        if (datum.h_index === 0)
                            return 0;
                        
-                       if (this_ptr.visible_v_indices[datum.v_index])
+                       if (datum.visible)
                            return 1.0;
                        return 0;
                    }).
@@ -511,8 +510,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           table_params.cell_height +
                           table_params.cell_height_padding;
 
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,false);
+                      return datum_y(datum,table_params,false);
                   }).
              attr('height',table_params.cell_height).
              attr('width',table_params.cell_width).
@@ -520,8 +518,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
-                       if ((datum.h_index === 0) &&
-                           (this_ptr.visible_v_indices[datum.v_index]))
+                       if ((datum.h_index === 0) && datum.visible)
                            return 1.0;
 
                        return 0;
@@ -542,13 +539,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                           table_params.cell_height +
                           table_params.cell_height_padding;
 
-                      return datum_y(datum,table_params,
-                                    this_ptr.visible_v_indices,false) +
+                      return datum_y(datum,table_params,false) +
                           v_spacing/2;
                   }).
              text(function(datum)
                   {
-                      if (this_ptr.visible_v_indices[datum.v_index])
+                      if (datum.visible)
                           return datum.datum;
                       return '';
                   }).
@@ -655,30 +651,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                  ++ datum.v_index;
          }
 
-         // update visible_v_indices with new indexes as well.
-         var old_visible_v_indices = this.visible_v_indices;
-         this.visible_v_indices = {};
-         for (var v_ind in old_visible_v_indices)
-         {
-             v_ind = parseInt(v_ind);
-             var old_val = old_visible_v_indices[v_ind];
-             if (v_ind === v_index)
-                 this.visible_v_indices[0] = old_val;
-             else if (v_ind < v_index)
-             {
-                 this.visible_v_indices[v_ind +1] = old_val;
-             }
-             else
-                 this.visible_v_indices[v_ind] = old_val;
-         }
-
-         // re-organizing fields_to_draw so that 0 in
-         this.fields_to_draw.splice(v_index,1);
-         this.fields_to_draw.unshift(0);
-         this.fields_to_draw[0] = field_to_make_top;
          // actually animate transition
          this._animate_transition(-1,true);
      };
+
      
  })();
 
