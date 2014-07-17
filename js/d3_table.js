@@ -782,31 +782,3 @@ function single_button_element_html(obj_field,index)
         '">' + obj_field + '</button>';
 }
 
-
-
-SELECTOR_ID = 'selector_id';
-
-/**
- @param {string} div_to_draw_selector_on_id --- Div id to draw
- selector on.
- 
- @param {list} obj_fields_list --- Each element is a string choose
- which to sort by.
-
- @param {Table} table --- table to re-sort when select different value
- to sort by.
- */
-function draw_sort_by_selector (
-    div_to_draw_selector_on_id,obj_fields_list,table)
-{
-    var selector_html = '<select id="' + SELECTOR_ID + '">';
-    for (var i =0; i < obj_fields_list.length; ++i)
-    {
-        var opt_value = obj_fields_list[i];
-        selector_html += '<option value="' + opt_value + '">';
-        selector_html += opt_value + '</option>';
-    }
-    
-    $('#' + div_to_draw_selector_on_id).html(selector_html);
-    table.register_selector_listener(SELECTOR_ID);
-};
