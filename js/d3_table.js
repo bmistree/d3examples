@@ -135,14 +135,14 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      };
      
      Tabler.prototype.draw_table = function(
-         all_data,fields_to_draw,table_params)
+         all_data,fields_to_draw,table_params,column_headers)
      {
          var to_return = new Table(
-             all_data,fields_to_draw,table_params);
+             all_data,fields_to_draw,table_params,column_headers);
          return to_return;
      };
      
-     function Table(all_data,fields_to_draw,table_params)
+     function Table(all_data,fields_to_draw,table_params,column_headers)
      {
          // when have no data, do not sort initial input data objects.
          // when presenting data, should be a string containing the
@@ -150,10 +150,49 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this.sorted_by_field = null;
 
          this.next_row_index = 0;
+         // labels for columns.
+         this.column_headers = column_headers;
          
          this.table_params = table_params;
          this.fields_to_draw = fields_to_draw;
-         this.table = d3.select('#' + table_params.div_id_to_draw_on).
+
+         var column_header_div_id = 'column_header_div_id';
+         var table_div_id = 'table_div_id';
+         $('#' + table_params.div_id_to_draw_on).html(
+             '<div id="' + column_header_div_id + '"></div>' +
+                 '<div id="' + table_div_id + '"></div>');
+
+         this.headers = d3.select('#' + column_header_div_id).
+             append('svg:svg').
+             attr('width', table_params.div_width).
+             attr('height', 30);
+
+         this.headers_texts = this.headers.selectAll('text').
+             data(this.column_headers).
+             enter().
+             append('svg:text').
+             attr('x',
+                  function (datum,i)
+                  {
+                      return datum_x(header_convert(i),table_params) + 10;
+                  }).
+             attr('y',
+                  function(datum,i)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+                      
+                      return datum_y(header_convert(i),table_params,false) +
+                          v_spacing/2;
+                  }).
+             text(function(datum)
+                  {
+                      return datum;
+                  });
+
+         
+         this.table = d3.select('#' + table_div_id).
              append('svg:svg').
              attr('width', table_params.div_width).
              attr('height', table_params.div_height);
@@ -686,6 +725,15 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this._animate_transition(-1,true);
      };
 
+
+     function header_convert(datum_index)
+     {
+         return {
+             h_index: datum_index + 2,
+             visible: true,
+             v_index: 0
+             };
+     }
      
  })();
 
