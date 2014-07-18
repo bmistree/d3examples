@@ -701,8 +701,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          for (i = 0; i < this.column_headers.length; ++i)
          {
              var item = this.column_headers[i];
-             console.log(item.h_index);
-
              if (item.h_index in h_index_mappings)
                  item.h_index = h_index_mappings[item.h_index];
          }
