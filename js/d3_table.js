@@ -500,123 +500,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      Table.prototype._animate_transition = function(v_index,check_sort)
      {
          var this_ptr = this;
-         // first part of transition, make room for new row:
-         this.headers_texts.transition().
-             attr('x',
-                  function (datum,i)
-                  {
-                      return datum_x(datum,table_params) + 10;
-                  }).
-             attr('y',
-                  function(datum,i)
-                  {
-                      var v_spacing =
-                          table_params.cell_height +
-                          table_params.cell_height_padding;
-                      
-                      return datum_y(datum,table_params,false) +
-                          v_spacing/2;
-                  }).
-             text(function(datum)
-                  {
-                      return datum.value;
-                  }).
-             duration(this_ptr.table_params.animation_duration_ms);
-
-         
-         this.rectangles.transition().
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,this_ptr.table_params);
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,this_ptr.table_params,new_entry);
-                  }).
-             attr('height',this_ptr.table_params.cell_height).
-             attr('width',this_ptr.table_params.cell_width).
-             attr('fill',
-                  function(datum)
-                  {
-                      return datum.bg_color;
-                  }).
-             style('opacity',
-                   function (datum)
-                   {
-                       if (datum.h_index === 0)
-                           return 0;
-                       
-                       if (datum.visible)
-                           return 1.0;
-                      
-                       return 0;
-                   }).
-             duration(this_ptr.table_params.animation_duration_ms);
-
-         // draw text
-         this.texts.transition().
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,this_ptr.table_params) + 10;;
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      var v_spacing =
-                          this_ptr.table_params.cell_height +
-                          this_ptr.table_params.cell_height_padding;
-
-                      var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,this_ptr.table_params,new_entry) +
-                          v_spacing/2;
-                  }).
-             text(function(datum)
-                  {
-                      if (datum.visible)
-                          return datum.datum;
-                      return '';
-                  }).
-             attr('fill',
-                  function(datum)
-                  {
-                      return datum.text_color;
-                  }).
-             duration(this_ptr.table_params.animation_duration_ms);
-
-         this.kill_imgs.transition().
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,this_ptr.table_params);
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      var v_spacing =
-                          this_ptr.table_params.cell_height +
-                          this_ptr.table_params.cell_height_padding;
-
-                      var new_entry = v_index == datum.v_index;
-                      return datum_y(datum,this_ptr.table_params,new_entry);
-                  }).
-             attr('height',this_ptr.table_params.cell_height).
-             attr('width',this_ptr.table_params.cell_width).
-             attr('xlink:href',this_ptr.table_params.url_to_remove_icon).
-             style('opacity',
-                   function (datum)
-                   {
-                       if ((datum.h_index === 0) && datum.visible)
-                           return 1.0;
-
-                       return 0;
-                   }).
-             duration(this_ptr.table_params.animation_duration_ms);
-
-         
          // second part of transition, drop the new element into place
          this.rectangles.transition().
              attr('x',
@@ -712,7 +595,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                    if (check_sort)
                        this_ptr.check_sort();
                });
-         
      };
 
      Table.prototype.check_sort = function()
