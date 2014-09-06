@@ -247,6 +247,110 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          return rectangles;
      }
 
+     /**
+      Write text labels on top of each box.
+      
+      For params, @see draw_rectangles
+      */
+     function draw_texts(table,d3_node,data_list,table_params)
+     {
+         // draw text on background rectangles
+         var texts = d3_node.selectAll('text').
+             data(data_list).
+             enter().
+             append('svg:text').
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params) + 10;
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+                      
+                      return datum_y(datum,table_params,false) +
+                          v_spacing/2;
+                  }).
+             text(function(datum)
+                  {
+                      if (datum.visible)
+                          return datum.datum;
+                      return '';
+                  }).
+             attr('fill',
+                  function(datum)
+                  {
+                      return datum.text_color;
+                  }).
+             on('click',
+                function(datum)
+                {
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        table.make_top(datum.field_name);
+                });
+         
+         return texts;
+     }
+
+     /**
+      Each table row contains an image that a user can click on to
+      remove the row (and potentially re-sort the list when the row
+      gets removed).
+
+      See parameters for draw_texts.
+      */
+     function draw_kill_imgs(
+         table,d3_node,data_list,table_params)
+     {
+         var kill_imgs = d3_node.selectAll('image').
+             data(data_list).
+             enter().
+             append('svg:image').
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      var v_spacing =
+                          table_params.cell_height +
+                          table_params.cell_height_padding;
+                      
+                      return datum_y(datum,table_params,false) +
+                          v_spacing/2;
+                  }).
+             text(function(datum)
+                  {
+                      if (datum.visible)
+                          return datum.datum;
+                      return '';
+                  }).
+             attr('xlink:href',table_params.url_to_remove_icon).
+             style('opacity',
+                   function (datum)
+                   {
+                       if ((datum.h_index === 0) && datum.visible)
+                           return 1.0;
+                       return 0;
+                   }).
+             on('click',
+                function(datum)
+                {
+                    // only want to set click handler for icons we're displaying
+                    if ((datum.h_index === 0) && datum.visible)
+                        table.remove_field(datum.field_name);
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        table.make_top(datum.field_name);
+                });
+         return kill_imgs;
+     }
      
      
      function Table(all_data,fields_to_draw,table_params,column_headers)
@@ -288,89 +392,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this.rectangles = draw_rectangles(
              this,this.table,this.data_list,table_params);
 
-         // draw text on background rectangles
-         this.texts = this.table.selectAll('text').
-             data(this.data_list).
-             enter().
-             append('svg:text').
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,table_params) + 10;
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      var v_spacing =
-                          table_params.cell_height +
-                          table_params.cell_height_padding;
-                      
-                      return datum_y(datum,table_params,false) +
-                          v_spacing/2;
-                  }).
-             text(function(datum)
-                  {
-                      if (datum.visible)
-                          return datum.datum;
-                      return '';
-                  }).
-             attr('fill',
-                  function(datum)
-                  {
-                      return datum.text_color;
-                  }).
-             on('click',
-                function(datum)
-                {
-                    // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
-                        this_ptr.make_top(datum.field_name);
-                });
-         
-         
-         this.kill_imgs = this.table.selectAll('image').
-             data(this.data_list).
-             enter().
-             append('svg:image').
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,table_params);
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      var v_spacing =
-                          table_params.cell_height +
-                          table_params.cell_height_padding;
-                      
-                      return datum_y(datum,table_params,false) +
-                          v_spacing/2;
-                  }).
-             text(function(datum)
-                  {
-                      if (datum.visible)
-                          return datum.datum;
-                      return '';
-                  }).
-             attr('xlink:href',table_params.url_to_remove_icon).
-             style('opacity',
-                   function (datum)
-                   {
-                       if ((datum.h_index === 0) && datum.visible)
-                           return 1.0;
-                       return 0;
-                   }).
-             on('click',
-                function(datum)
-                {
-                    // only want to set click handler for icons we're displaying
-                    if ((datum.h_index === 0) && datum.visible)
-                        this_ptr.remove_field(datum.field_name);
-                    // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
-                        this_ptr.make_top(datum.field_name);
-                });
+         this.texts = draw_texts(
+             this,this.table,this.data_list,table_params);
+
+         this.kill_imgs = draw_kill_imgs(
+             this,this.table,this.data_list,table_params);                  
          
      };
 
