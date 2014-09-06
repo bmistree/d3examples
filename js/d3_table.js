@@ -141,34 +141,28 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              all_data,fields_to_draw,table_params,column_headers);
          return to_return;
      };
-     
-     function Table(all_data,fields_to_draw,table_params,column_headers)
+
+     /**
+      @param {string} column_header_div_id --- The div id for the div
+      to write the names of the column headers.
+
+      @param {TableParams} table_params --- Keeps track of parameters
+      for table parameters.
+
+      @param {list} column_headers --- Each element is a string.  The
+      plaintext name of each column field.
+      
+      */
+     function draw_column_headers(
+         column_header_div_id,table_params,column_headers)
      {
-         // when have no data, do not sort initial input data objects.
-         // when presenting data, should be a string containing the
-         // field to draw
-         this.sorted_by_field = null;
-
-         this.next_row_index = 0;
-         // labels for columns.
-         this.column_headers = copy_column_headers(column_headers);
-
-         this.table_params = table_params;
-         this.fields_to_draw = fields_to_draw;
-
-         var column_header_div_id = 'column_header_div_id';
-         var table_div_id = 'table_div_id';
-         $('#' + table_params.div_id_to_draw_on).html(
-             '<div id="' + column_header_div_id + '"></div>' +
-                 '<div id="' + table_div_id + '"></div>');
-
-         this.headers = d3.select('#' + column_header_div_id).
+         var headers = d3.select('#' + column_header_div_id).
              append('svg:svg').
              attr('width', table_params.div_width).
              attr('height', 30);
 
-         this.headers_texts = this.headers.selectAll('text').
-             data(this.column_headers).
+         var headers_texts = headers.selectAll('text').
+             data(column_headers).
              enter().
              append('svg:text').
              attr('x',
@@ -191,6 +185,32 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                       return datum.value;
                   });
 
+         return headers_texts;
+     }
+     
+     function Table(all_data,fields_to_draw,table_params,column_headers)
+     {
+         // when have no data, do not sort initial input data objects.
+         // when presenting data, should be a string containing the
+         // field to draw
+         this.sorted_by_field = null;
+
+         this.next_row_index = 0;
+         // labels for columns.
+         this.column_headers = copy_column_headers(column_headers);
+
+         this.table_params = table_params;
+         this.fields_to_draw = fields_to_draw;
+
+         var column_header_div_id = 'column_header_div_id';
+         var table_div_id = 'table_div_id';
+         $('#' + table_params.div_id_to_draw_on).html(
+             '<div id="' + column_header_div_id + '"></div>' +
+                 '<div id="' + table_div_id + '"></div>');
+
+         this.headers_texts = draw_column_headers(
+             column_header_div_id,table_params,this.column_headers);
+         
          
          this.table = d3.select('#' + table_div_id).
              append('svg:svg').
