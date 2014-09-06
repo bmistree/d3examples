@@ -143,6 +143,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      };
 
      /**
+      Render all the category headers that can sort by.
+      
       @param {string} column_header_div_id --- The div id for the div
       to write the names of the column headers.
 
@@ -187,6 +189,65 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
          return headers_texts;
      }
+
+     /**
+      Render the backgrounds for all background rectangles.
+      
+      @param {Table} table
+      @param {D3 node} d3_node --- Selection from d3. 
+      @param {list} data_list --- Each element is an object of the form:
+      {
+          h_index: <int>, // index of all_data
+          v_index: <int>, // index of fields_to_draw
+          datum: value,
+          visible: <bool>, // whether or not this field is visible
+          bg_color: <string>,
+          text_color: <string>
+      }
+      @param {TableParams} table_params --- 
+     */
+     function draw_rectangles(table,d3_node,data_list,table_params)
+     {
+         // draw background rectangles
+         var rectangles = d3_node.selectAll('rect').
+             data(data_list).
+             enter().
+             append('svg:rect').
+             attr('x',
+                  function (datum)
+                  {
+                      return datum_x(datum,table_params);
+                  }).
+             attr('y',
+                  function(datum)
+                  {
+                      return datum_y(datum,table_params,false);
+                  }).
+             attr('height',table_params.cell_height).
+             attr('width',table_params.cell_width).
+             attr('fill',
+                  function(datum)
+                  {
+                      return datum.bg_color;
+                  }).
+             style('opacity',
+                   function (datum)
+                   {
+                       if (datum.visible)
+                           return 1.0;
+                       return 0;
+                   }).
+             on('click',
+                function(datum)
+                {
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        table.make_top(datum.field_name);
+                });
+         return rectangles;
+     }
+
+     
      
      function Table(all_data,fields_to_draw,table_params,column_headers)
      {
@@ -224,44 +285,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                  all_data,fields_to_draw,table_params);
          
          var this_ptr = this;
-
-         // draw background rectangles
-         this.rectangles = this.table.selectAll('rect').
-             data(this.data_list).
-             enter().
-             append('svg:rect').
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,table_params);
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      return datum_y(datum,table_params,false);
-                  }).
-             attr('height',table_params.cell_height).
-             attr('width',table_params.cell_width).
-             attr('fill',
-                  function(datum)
-                  {
-                      return datum.bg_color;
-                  }).
-             style('opacity',
-                   function (datum)
-                   {
-                       if (datum.visible)
-                           return 1.0;
-                       return 0;
-                   }).
-             on('click',
-                function(datum)
-                {
-                    // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
-                        this_ptr.make_top(datum.field_name);
-                });
-
+         this.rectangles = draw_rectangles(
+             this,this.table,this.data_list,table_params);
 
          // draw text on background rectangles
          this.texts = this.table.selectAll('text').
