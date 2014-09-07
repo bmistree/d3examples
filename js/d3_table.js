@@ -1,5 +1,4 @@
-CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
-
+ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
 
 (function()
  {
@@ -620,11 +619,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                  continue;
 
              var new_button_html = single_button_element_html(
-                 obj_field,i);
-             $('#' + this.checkbox_div_id).append(new_button_html);
+                 obj_field,iROW_NAME_BUTTON_ID_PREFIX);
+             $('#' + this.row_name_button_id).append(new_button_html);
 
-             var checkbox_id = CHECKBOX_ID_PREFIX + i;
-             $('#'+checkbox_id).click(
+             var button_id = ROW_NAME_BUTTON_ID_PREFIX + i;
+             $('#'+button_id).click(
                  button_clicked_listener_factory(obj_field,this));
          }
      };
@@ -820,28 +819,27 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      
  })();
 
-
 /**
- @param {string} checkbox_div_id --- Div id for checkbox.
+ @param {string} row_name_button_id --- id for button
  @param {list} field_list --- Each element is a string
  @param {Table} table
  */
-function render_checkboxes(checkbox_div_id,field_list,table)
+function render_row_name_buttons(row_name_button_id,field_list,table)
 {
-    $('#'+checkbox_div_id).html(
-        generate_checkbox_list_html(field_list));
-    table.checkbox_div_id = checkbox_div_id;
+    $('#'+row_name_button_id).html(
+        generate_button_list_html(field_list, ROW_NAME_BUTTON_ID_PREFIX));
+    table.row_name_button_id = row_name_button_id;
     table.obj_fields_list = field_list;
-    add_checkbox_listeners(field_list,table);
+    add_row_name_button_listeners(field_list,table);
 }
 
-function add_checkbox_listeners(obj_fields_list,table)
+function add_row_name_button_listeners(obj_fields_list,table)
 {
     for (var i=0; i < obj_fields_list.length; ++i)
     {
         var obj_field = obj_fields_list[i];
-        var checkbox_id = CHECKBOX_ID_PREFIX + i;
-        $('#'+checkbox_id).click(
+        var button_id = ROW_NAME_BUTTON_ID_PREFIX + i;
+        $('#'+button_id).click(
             button_clicked_listener_factory(obj_field,table));
     }
 }
@@ -858,20 +856,22 @@ function button_clicked_listener_factory(obj_field,table)
     };
 }
 
-function generate_checkbox_list_html(obj_fields_list)
+function generate_button_list_html(
+    obj_fields_list,button_id_prefix)
 {
     var to_return = '';
     for (var i = 0; i < obj_fields_list.length; ++i)
     {
         var obj_field = obj_fields_list[i];
-        to_return += single_button_element_html(obj_field,i);
+        to_return +=
+            single_button_element_html(
+                obj_field,i,button_id_prefix);
     }
     return to_return;
 }
 
-function single_button_element_html(obj_field,index)
-{    
-    return '<button id="' + CHECKBOX_ID_PREFIX + index +
+function single_button_element_html(obj_field,index,button_id_prefix)
+{
+    return '<button id="' + button_id_prefix + index +
         '">' + obj_field + '</button>';
 }
-
