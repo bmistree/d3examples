@@ -211,8 +211,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   }).
              text(function(datum)
                   {
-                      return datum.value;
+                      if (datum.visible)
+                          return datum.value;
+                      return '';
                   });
+
 
          return headers_texts;
      }
@@ -676,9 +679,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      /**
       @param {list} column_headers --- Each element is a string.
 
-      @returns{list} --- Each element has an h_index in it.  Initial
-      h_index starts at table_params.data_col_offset and increments
-      by one each.
+      @returns{list} --- Each element is a Datum object.
       */
      function copy_column_headers(column_headers,table_params)
      {
@@ -686,13 +687,14 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          for (var i =0; i < column_headers.length; ++i)
          {
              var val = column_headers[i];
-             to_return.push(
-                 {
-                     h_index: i + table_params.first_data_col_index,
-                     v_index: 0,
-                     value: val,
-                     visible: true
-                 });
+             
+             // Note: initial h_index starts at
+             // table_params.data_col_offset and
+             // increments by one each.
+             var h_index =  i + table_params.first_data_col_index;
+             var datum =
+                 new Datum(h_index,0,val,true,'white','black',val);
+             to_return.push(datum);
          }
          return to_return;
      }
