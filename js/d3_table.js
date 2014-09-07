@@ -619,7 +619,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          }
 
          --this.next_row_index;
-         this._animate_transition(v_index,true);
+         this._animate_transition(true);
 
          // draw the button again.
          for (i = 0; i < this.obj_fields_list.length; ++i)
@@ -666,7 +666,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          recalculate_data_h_indices(
              this.data_list,this.column_headers,this.table_params);
 
-         this._animate_transition(-1,true);
+         this._animate_transition(true);
      };
      
      /**
@@ -695,17 +695,15 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              this.data_list,this.column_headers,this.table_params);
          recalculate_data_h_indices(
              this.data_list,this.column_headers,this.table_params);
-         this._animate_transition(v_index,true);
+         this._animate_transition(true);
      };
 
          
      /**
-      @param {int} v_index --- Vertical index of new row to add.
-      
       @param (optional) {bool} check_sort --- true if should run
       check sort afterwards.
       */
-     Table.prototype._animate_transition = function(v_index,check_sort)
+     Table.prototype._animate_transition = function(check_sort)
      {
          // Insert new element
          var this_ptr = this;
@@ -728,6 +726,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                });             
      };
 
+
+     
      Table.prototype.check_sort = function()
      {
          // update h_index for data items... sort by fields that are
@@ -786,7 +786,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                  item.h_index = h_index_mappings[item.h_index];
          }
 
-         this._animate_transition(-1,false);
+         this._animate_transition(false);
      };
      
      /**
@@ -832,7 +832,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          }
 
          // actually animate transition
-         this._animate_transition(-1,true);
+         this._animate_transition(true);
      };
 
      /**
