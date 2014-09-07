@@ -335,7 +335,25 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          var kill_imgs = d3_node.selectAll('image').
              data(data_list).
              enter().
-             append('svg:image').
+             append('svg:image');
+         return set_kill_imgs_positions_and_fill(
+             kill_imgs,table_params).
+             on('click',
+                function(datum)
+                {
+                    // only want to set click handler for icons we're displaying
+                    if ((datum.h_index === 0) && datum.visible)
+                        table.remove_field(datum.field_name);
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        table.make_top(datum.field_name);
+                });
+     }
+
+     function set_kill_imgs_positions_and_fill(
+         kill_imgs_d3_node,table_params)
+     {
+         return kill_imgs_d3_node.
              attr('x',
                   function (datum)
                   {
@@ -347,16 +365,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                       var v_spacing =
                           table_params.cell_height +
                           table_params.cell_height_padding;
-                      
-                      return datum_y(datum,table_params,false) +
-                          v_spacing/2;
+
+                      return datum_y(datum,table_params,false);
                   }).
-             text(function(datum)
-                  {
-                      if (datum.visible)
-                          return datum.datum;
-                      return '';
-                  }).
+             attr('height',table_params.cell_height).
+             attr('width',table_params.cell_width).
              attr('xlink:href',table_params.url_to_remove_icon).
              style('opacity',
                    function (datum)
@@ -364,20 +377,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                        if ((datum.h_index === 0) && datum.visible)
                            return 1.0;
                        return 0;
-                   }).
-             on('click',
-                function(datum)
-                {
-                    // only want to set click handler for icons we're displaying
-                    if ((datum.h_index === 0) && datum.visible)
-                        table.remove_field(datum.field_name);
-                    // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
-                        table.make_top(datum.field_name);
-                });
-         return kill_imgs;
+                   });
      }
-     
      
      function Table(all_data,fields_to_draw,table_params,column_headers)
      {
@@ -530,33 +531,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          set_rectangles_positions_and_fill(
              this.rectangles.transition(),this.table_params).
              duration(this_ptr.table_params.animation_duration_ms);
-
-         this.kill_imgs.transition().
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,this_ptr.table_params);
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      var v_spacing =
-                          this_ptr.table_params.cell_height +
-                          this_ptr.table_params.cell_height_padding;
-
-                      return datum_y(datum,this_ptr.table_params,false);
-                  }).
-             attr('height',this_ptr.table_params.cell_height).
-             attr('width',this_ptr.table_params.cell_width).
-             attr('xlink:href',this_ptr.table_params.url_to_remove_icon).
-             style('opacity',
-                   function (datum)
-                   {
-                       if ((datum.h_index === 0) && datum.visible)
-                           return 1.0;
-
-                       return 0;
-                   }).
+         set_kill_imgs_positions_and_fill(
+             this.kill_imgs.transition(),this.table_params).
              duration(this_ptr.table_params.animation_duration_ms);
 
          // draws new text positions as part of animation
