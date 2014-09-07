@@ -2,7 +2,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
 (function()
  {
-     function TableParams(div_id_to_draw_on,div_height,url_to_remove_icon)
+     /**
+      @param (optional) {dictionary} color_scale_map --- Keys are
+      field names, values are color scales.  For each field name,
+      check map.  If field is in color_scale_map, then use associated
+      d3 color scale to determine background color.  Otherwise, use
+      this.default_color_scale.
+      */
+     function TableParams(
+         div_id_to_draw_on,div_height,url_to_remove_icon,
+         color_scale_map)
      {
          this.url_to_remove_icon = url_to_remove_icon;
          this.div_id_to_draw_on = div_id_to_draw_on;
@@ -14,9 +23,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this.cell_height_padding = 5;
          this.animation_duration_ms = 500;
          this.text_color = 'black';
-         this.color_scale = d3.scale.linear()
+         this.default_color_scale = d3.scale.linear()
              .domain([0,10])
              .range(["white", "red"]);
+
+         if (color_scale_map === undefined)
+             this.color_scale_map = {};
+         else
+             this.color_scale_map = color_scale_map;
+
+         console.log(this.color_scale_map);
      }
 
      /**
@@ -110,13 +126,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   ++data_index)
              {
                  var datum = all_data[data_index];
+
+                 var color_scale = table_params.default_color_scale;
+                 if (field in table_params.color_scale_map)
+                     color_scale = table_params.color_scale_map[field];
+                 var background_color = color_scale(datum[field]);
+
                  var new_item =
                      new Datum(
-                         data_index + 2, -1, datum[field],
-                         false,
-                         table_params.color_scale(datum[field]),
-                         table_params.text_color,
-                         field);
+                         data_index + 2, -1, datum[field],false,
+                         background_color,table_params.text_color,field);
                  
                  to_return.push(new_item);
              }
@@ -128,13 +147,18 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      function Tabler()
      { }
 
+     /**
+      @see TableParams arguments.
+      */
      Tabler.prototype.table_params = function(
-         div_id_to_draw_on,div_height,url_to_remove_icon)
+         div_id_to_draw_on,div_height,url_to_remove_icon,
+         color_scale_map)
      {
          return new TableParams(
-             div_id_to_draw_on,div_height,url_to_remove_icon);
+             div_id_to_draw_on,div_height,url_to_remove_icon,
+             color_scale_map);
      };
-     
+
      Tabler.prototype.draw_table = function(
          all_data,fields_to_draw,table_params,column_headers)
      {
@@ -368,7 +392,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                        return 0;
                    });
      }
-     
+
+     /**
+      @param {list} fields_to_draw --- Each element is a string:
+      the field name of objects to draw.
+      */
      function Table(all_data,fields_to_draw,table_params,column_headers)
      {
          // when have no data, do not sort initial input data objects.

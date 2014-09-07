@@ -66,13 +66,20 @@
           }
       ];
 
-
+      var color_scale_map = {
+          "hotspot": d3.scale.linear()
+             .domain([0,10])
+             .range(["blue", "green"]),
+          "new_field": d3.scale.linear()
+             .domain([0,10])
+             .range(["orange", "purple"]),
+      };
+      
       var table_params =
           TableFactory.table_params(
-              "drawing_div_id",800,
-              "img/gray_remove.png");
-      //"img/glyphicons_197_remove.png");
-
+              "drawing_div_id",800,"img/gray_remove.png",
+              color_scale_map);
+      
       var field_list = [
           "hotspot","conform","bladder","new_field","other_field"];
       var table = TableFactory.draw_table(
