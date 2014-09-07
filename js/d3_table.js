@@ -164,6 +164,54 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      }
 
      /**
+      
+      */
+     function recalculate_data_visibles(
+         all_data_list,header_data_list,table_params)
+     {
+         // indices are column names, values are booleans.  true if
+         // should be visible; false if should not be visible.
+         var visibility_col_map = {};
+         for (var i = 0; i < header_data_list.length; ++i)
+         {
+             var header_datum = header_data_list[i];
+             visibility_col_map[header_datum.col_name] =
+                 header_datum.visible;
+         }
+
+         // indices are row names, values are booleans.  true if
+         // should be visible; false if should not be visible.
+         var visibility_row_map = {};
+         for (i = 0; i < all_data_list.length; ++i)
+         {
+             var datum = all_data_list[i];
+             if (datum.h_index === 0)
+                 visibility_row_map[datum.row_name] = datum.visible;
+         }
+
+         for (i = 0; i < all_data_list.length; ++i)
+         {
+             var datum = all_data_list[i];
+
+             if (datum.h_index < table_params.first_data_col_index )
+             {
+                 // all columns that don't have headers should stay
+                 // visible, regardless of what headers are available.
+                 datum.visible = visibility_row_map[datum.row_name];
+             }
+             else
+             {
+                 // otherwise, visibility is a combination of whether
+                 // the column and row were visible.
+                 datum.visible =
+                     visibility_row_map[datum.row_name] &&
+                     visibility_col_map[datum.col_name];
+             }
+         }
+     }
+
+     
+     /**
       @param {list} all_data_list --- Each element is a datum object.
       Assign a new h_index for each object that are visible.
 
@@ -592,14 +640,21 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          for (var i =0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-
              if (datum.row_name === field_to_insert)
-             {                 
-                 datum.visible = true;
+             {
+                 // at this point set visibility only for row headers.
+                 // use set visibility and set_h_index methods
+                 // separately otherwise.
+                 if (datum.h_index < table_params.first_data_col_index)
+                     datum.visible = true;
+                 
                  datum.v_index = v_index;
              }
          }
-         
+         recalculate_data_visibles(
+             this.data_list,this.column_headers,this.table_params);
+         recalculate_data_h_indices(
+             this.data_list,this.column_headers,this.table_params);
          this._animate_transition(v_index,true);
      };
 
