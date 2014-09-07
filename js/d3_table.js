@@ -32,7 +32,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          else
              this.color_scale_map = color_scale_map;
 
-         console.log(this.color_scale_map);
      }
 
      /**
@@ -648,7 +647,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      {
          var prev_sorted_field = this.sorted_by_field;
          this.sorted_by_field = $('#' + selector_id).find(':selected').text();
-         console.log('Sorted ' + this.sorted_by_field);
          this.make_top(this.sorted_by_field);
      };
 
@@ -713,7 +711,6 @@ function draw_random_fields(table,field_list)
     var redraw_func = function()
     {
         var rand_index = Math.floor(Math.random()*field_list.length);
-        console.log('Trying to draw ' + field_list[rand_index]);
         table.insert_field(field_list[rand_index]);
         // table.insert_field(field_list[index_to_draw_on--]);
     };
