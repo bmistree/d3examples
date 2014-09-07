@@ -19,7 +19,10 @@
 
   <body >
 
-    <div id="checkbox_div_id">
+    <div id="row_buttons_div_id">
+    </div>
+
+    <div id="col_buttons_div_id">
     </div>
 
     <br/>
@@ -82,10 +85,13 @@
       
       var field_list = [
           "hotspot","conform","bladder","new_field","other_field"];
+      var col_names_list = [
+          "a","b","c","d","e"];
       var table = TableFactory.draw_table(
           all_data, field_list, table_params);
 
-      render_row_name_buttons("checkbox_div_id",field_list,table);
+      render_row_name_buttons("row_buttons_div_id",field_list,table);
+      render_col_name_buttons("col_buttons_div_id",col_names_list,table);
 
     </script>
     

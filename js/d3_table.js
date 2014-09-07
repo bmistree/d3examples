@@ -1,4 +1,5 @@
 ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
+COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
 
 (function()
  {
@@ -220,7 +221,7 @@ ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
      function recalculate_data_h_indices(all_data_list,header_data_list,table_params)
      {
          var visible_header_to_h_index_map = {};
-         var number_visible_headers = 0;
+         var num_visible_headers = 0;
          for (var i = 0; i < header_data_list.length; ++i)
          {
              var header_datum = header_data_list[i];
@@ -230,7 +231,7 @@ ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
                      table_params.first_data_col_index +
                      num_visible_headers;
                  ++num_visible_headers;
-
+                 
                  header_datum.h_index = visible_header_h_index;
                  visible_header_to_h_index_map[header_datum.col_name] =
                      visible_header_h_index;
@@ -296,7 +297,17 @@ ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
          var headers_texts = headers.selectAll('text').
              data(column_headers).
              enter().
-             append('svg:text').
+             append('svg:text');
+
+         return set_headers_positions_and_text(headers_texts,table_params);
+     }
+
+     /**
+      Likely table.headers_texts
+      */
+     function set_headers_positions_and_text(d3_node,table_params)
+     {
+         return d3_node.
              attr('x',
                   function (datum,i)
                   {
@@ -319,11 +330,9 @@ ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
                           return datum.value;
                       return '';
                   });
-
-
-         return headers_texts;
      }
 
+     
      /**
       Render the backgrounds for all background rectangles.
       
@@ -525,7 +534,7 @@ ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
          // labels for columns.
          this.column_headers =
              copy_column_headers(column_headers,table_params);
-         
+
          this.table_params = table_params;
          this.fields_to_draw = fields_to_draw;
 
@@ -619,7 +628,7 @@ ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
                  continue;
 
              var new_button_html = single_button_element_html(
-                 obj_field,iROW_NAME_BUTTON_ID_PREFIX);
+                 obj_field,ROW_NAME_BUTTON_ID_PREFIX);
              $('#' + this.row_name_button_id).append(new_button_html);
 
              var button_id = ROW_NAME_BUTTON_ID_PREFIX + i;
@@ -628,6 +637,26 @@ ROW_NAME_BUTTON_ID_PREFIX = 'd3_table_row_name_prefix_id_';
          }
      };
 
+     /**
+      @param {string} column_name_to_insert --- The name of a new
+      column to make visible.
+      */
+     Table.prototype.insert_column = function(column_name_to_insert)
+     {
+         for (var i = 0; i < this.column_headers.length; ++i)
+         {
+             var header_datum = this.column_headers[i];
+             if (header_datum.col_name === column_name_to_insert)
+                 header_datum.visible = true;
+         }
+         set_headers_positions_and_text(this.headers_texts,this.table_params);
+         
+         recalculate_data_visibles(
+             this.data_list,this.column_headers,this.table_params);
+         recalculate_data_h_indices(
+             this.data_list,this.column_headers,this.table_params);
+     };
+     
      /**
       @param {string} field_to_insert --- Name of object field to
       draw.
@@ -833,6 +862,45 @@ function render_row_name_buttons(row_name_button_id,field_list,table)
     add_row_name_button_listeners(field_list,table);
 }
 
+/**
+ @param {string} col_name_button_id --- id for button
+ @param {list} col_name_list --- Each element is a string that should
+ be a header for each separate column.
+ @param {Table} table
+ */
+function render_col_name_buttons(col_name_button_id,col_name_list,table)
+{
+    $('#'+col_name_button_id).html(
+        generate_button_list_html(col_name_list, COL_NAME_BUTTON_ID_PREFIX));
+    table.col_name_button_id = col_name_button_id;
+    table.col_name_list = col_name_list;
+    add_col_name_button_listeners(col_name_list,table);
+}
+
+function add_col_name_button_listeners(col_name_list,table)
+{
+    for (var i=0; i < col_name_list.length; ++i)
+    {
+        var col_name = col_name_list[i];
+        var button_id = COL_NAME_BUTTON_ID_PREFIX + i;
+        $('#'+button_id).click(
+            col_button_clicked_listener_factory(col_name,table));
+    }
+}
+
+/**
+ @returns function
+ */
+function col_button_clicked_listener_factory(col_name,table)
+{
+    return function()
+    {
+        table.insert_column(col_name);
+        $(this).remove();
+    };
+}
+
+
 function add_row_name_button_listeners(obj_fields_list,table)
 {
     for (var i=0; i < obj_fields_list.length; ++i)
@@ -840,14 +908,14 @@ function add_row_name_button_listeners(obj_fields_list,table)
         var obj_field = obj_fields_list[i];
         var button_id = ROW_NAME_BUTTON_ID_PREFIX + i;
         $('#'+button_id).click(
-            button_clicked_listener_factory(obj_field,table));
+            row_button_clicked_listener_factory(obj_field,table));
     }
 }
 
 /**
  @returns function
  */
-function button_clicked_listener_factory(obj_field,table)
+function row_button_clicked_listener_factory(obj_field,table)
 {
     return function()
     {
