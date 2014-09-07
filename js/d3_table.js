@@ -563,7 +563,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              {
                  top_row.push(
                      {
-                         datum: datum.value,
+                         value: datum.value,
                          h_index: datum.h_index
                      });
              }
