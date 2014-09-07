@@ -19,6 +19,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              .range(["white", "red"]);
      }
 
+     /**
+      Get the x position that should draw datum in for the given table
+      parameters.
+      */
      function datum_x(datum,table_params)
      {
          if (! datum.visible)
@@ -258,8 +262,27 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          var texts = d3_node.selectAll('text').
              data(data_list).
              enter().
-             append('svg:text').
-             attr('x',
+             append('svg:text');
+
+         set_text_positions_and_fills(table,texts,table_params)
+             .on('click',
+                function(datum)
+                {
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        table.make_top(datum.field_name);
+                });
+         return texts;
+     }
+
+     /**
+      Sets attributes for text positions and fills.
+
+      @returns d3 node that setting positions and fills for.
+      */
+     function set_text_positions_and_fills(table,texts_d3_node,table_params)
+     {
+         return texts_d3_node.attr('x',
                   function (datum)
                   {
                       return datum_x(datum,table_params) + 10;
@@ -284,16 +307,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   function(datum)
                   {
                       return datum.text_color;
-                  }).
-             on('click',
-                function(datum)
-                {
-                    // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
-                        table.make_top(datum.field_name);
-                });
-         
-         return texts;
+                  });
      }
 
      /**
@@ -499,8 +513,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       */
      Table.prototype._animate_transition = function(v_index,check_sort)
      {
+         // Insert new element
          var this_ptr = this;
-         // second part of transition, drop the new element into place
          this.rectangles.transition().
              attr('x',
                   function (datum)
@@ -560,41 +574,16 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                    }).
              duration(this_ptr.table_params.animation_duration_ms);
 
-         // draws texts
-         this.texts.transition().
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,this_ptr.table_params) + 10;;
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      var v_spacing =
-                          this_ptr.table_params.cell_height +
-                          this_ptr.table_params.cell_height_padding;
-
-                      return datum_y(datum,this_ptr.table_params,false) +
-                          v_spacing/2;
-                  }).
-             text(function(datum)
-                  {
-                      if (datum.visible)
-                          return datum.datum;
-                      return '';
-                  }).
-             attr('fill',
-                  function(datum)
-                  {
-                      return datum.text_color;
-                  }).
-             duration(this_ptr.table_params.animation_duration_ms)
-         .each('end',
+         // draws new text positions as part of animation
+         set_text_positions_and_fills(
+             this,this.texts.transition(),this.table_params)
+             .duration(this_ptr.table_params.animation_duration_ms)
+             .each('end',
                function()
                {
                    if (check_sort)
                        this_ptr.check_sort();
-               });
+               });             
      };
 
      Table.prototype.check_sort = function()
