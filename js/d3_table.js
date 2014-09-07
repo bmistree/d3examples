@@ -50,31 +50,31 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              table_params.cell_width +
              table_params.cell_height_padding;
          var adjust = 0;
-         if (datum.h_index === 0)
+         if (datum.col_index === 0)
              adjust += 30;
-         var to_return = h_spacing * datum.h_index + adjust;
+         var to_return = h_spacing * datum.col_index + adjust;
          return to_return;
      }
      /**
-      @param {bool} new_entry --- If new entry, use one less v_index.
+      @param {bool} new_entry --- If new entry, use one less row_index.
       */
      function datum_y(datum,table_params,new_entry)
      {
-         var v_index = datum.v_index;
+         var row_index = datum.row_index;
          if (new_entry)
-             --v_index;
-         if (v_index < 0)
-             v_index = 0;
+             --row_index;
+         if (row_index < 0)
+             row_index = 0;
          
          var v_spacing =
              table_params.cell_height +
              table_params.cell_height_padding;
-         return v_spacing * v_index;
+         return v_spacing * row_index;
      }
 
      /**
-      @param {int} h_index --- index of all_data
-      @param {int} v_index --- index of fields_to_draw
+      @param {int} col_index --- index of all_data
+      @param {int} row_index --- index of fields_to_draw
       @param {Any} value
       @param {bool} visible --- Whether or not this field is visible
       @param {string} bg_color --- Color to draw for this value.
@@ -83,11 +83,11 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       @param {string} col_name --- Name of col in.
       */
      function Datum(
-         h_index, v_index,value,visible,bg_color,text_color,row_name,
+         col_index, row_index,value,visible,bg_color,text_color,row_name,
          col_name)
      {
-         this.h_index = h_index;
-         this.v_index = v_index;
+         this.col_index = col_index;
+         this.row_index = row_index;
          this.value = value;
          this.visible = visible;
          this.bg_color = bg_color;
@@ -148,13 +148,13 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                  // ultimately, may be okay to just set this to null
                  // because when add field each time, will just
                  // recalculate.
-                 var h_index = 
+                 var col_index = 
                      column_header_list_index +
                      table_params.first_data_col_index;
                  
                  var new_item =
                      new Datum(
-                         h_index,-1, datum[field],false, background_color,
+                         col_index,-1, datum[field],false, background_color,
                          table_params.text_color,field,column_header);
                  
                  to_return.push(new_item);
@@ -185,7 +185,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          for (i = 0; i < all_data_list.length; ++i)
          {
              var datum = all_data_list[i];
-             if (datum.h_index === 0)
+             if (datum.col_index === 0)
                  visibility_row_map[datum.row_name] = datum.visible;
          }
 
@@ -193,7 +193,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          {
              var datum = all_data_list[i];
 
-             if (datum.h_index < table_params.first_data_col_index )
+             if (datum.col_index < table_params.first_data_col_index )
              {
                  // all columns that don't have headers should stay
                  // visible, regardless of what headers are available.
@@ -213,38 +213,38 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
      
      /**
       @param {list} all_data_list --- Each element is a datum object.
-      Assign a new h_index for each object that are visible.
+      Assign a new col_index for each object that are visible.
 
       @param {list} header_data_list --- Each element is a datum
-      object.  Sets h_index for all visible objects.
+      object.  Sets col_index for all visible objects.
       */
      function recalculate_data_h_indices(all_data_list,header_data_list,table_params)
      {
-         var visible_header_to_h_index_map = {};
+         var visible_header_to_col_index_map = {};
          var num_visible_headers = 0;
          for (var i = 0; i < header_data_list.length; ++i)
          {
              var header_datum = header_data_list[i];
              if (header_datum.visible)
              {
-                 var visible_header_h_index =
+                 var visible_header_col_index =
                      table_params.first_data_col_index +
                      num_visible_headers;
                  ++num_visible_headers;
                  
-                 header_datum.h_index = visible_header_h_index;
-                 visible_header_to_h_index_map[header_datum.col_name] =
-                     visible_header_h_index;
+                 header_datum.col_index = visible_header_col_index;
+                 visible_header_to_col_index_map[header_datum.col_name] =
+                     visible_header_col_index;
              }
          }
 
          for (i = 0; i < all_data_list.length; ++i)
          {
              var datum = all_data_list[i];
-             if (datum.col_name in visible_header_to_h_index_map)
+             if (datum.col_name in visible_header_to_col_index_map)
              {
-                 datum.h_index =
-                     visible_header_to_h_index_map[datum.col_name];
+                 datum.col_index =
+                     visible_header_to_col_index_map[datum.col_name];
              }
          }
      }
@@ -355,7 +355,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                 function(datum)
                 {
                     // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
+                    if ((datum.col_index === 1) && datum.visible)
                         table.make_top(datum.row_name);
                 });
      }
@@ -384,7 +384,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              style('opacity',
                    function (datum)
                    {
-                       if (datum.h_index === 0)
+                       if (datum.col_index === 0)
                            return 0;
                        
                        if (datum.visible)
@@ -412,7 +412,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                 function(datum)
                 {
                     // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
+                    if ((datum.col_index === 1) && datum.visible)
                         table.make_top(datum.row_name);
                 });
          return texts;
@@ -473,10 +473,13 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                 function(datum)
                 {
                     // only want to set click handler for icons we're displaying
-                    if ((datum.h_index === 0) && datum.visible)
+                    if ((datum.col_index === 0) && datum.visible)
                         table.remove_field(datum.row_name);
+
+                    // FIXME: should this be row_index???
+                    
                     // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
+                    if ((datum.col_index === 1) && datum.visible)
                         table.make_top(datum.row_name);
                 });
      }
@@ -505,7 +508,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              style('opacity',
                    function (datum)
                    {
-                       if ((datum.h_index === 0) && datum.visible)
+                       if ((datum.col_index === 0) && datum.visible)
                            return 1.0;
                        return 0;
                    });
@@ -574,15 +577,15 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       @returns {int or null} --- int is vindex.  null means row_name
       not in fields_to_draw.
       */
-     Table.prototype._find_v_index = function(finding_row_name)
+     Table.prototype._find_row_index = function(finding_row_name)
      {
          for (var i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             if ((datum.h_index === 1) && (finding_row_name === datum.row_name))
+             if ((datum.col_index === 1) && (finding_row_name === datum.row_name))
              {
                  if (datum.visible)
-                     return datum.v_index;
+                     return datum.row_index;
                  return null;
              }
          }
@@ -595,26 +598,28 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       */
      Table.prototype.remove_field = function (field_to_remove)
      {
-         var v_index = this._find_v_index(field_to_remove);
+         console.log('Removing field');
+         
+         var row_index = this._find_row_index(field_to_remove);
          var this_ptr = this;
          
          // field doesn't exist.
-         if (v_index === null)
+         if (row_index === null)
              return;
 
          for (var i =0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             if (datum.v_index == v_index)
+             if (datum.row_index == row_index)
              {
-                 datum.v_index = -1;
+                 datum.row_index = -1;
                  datum.visible = false;
              }
 
              if (datum.visible)
              {
-                 if (datum.v_index > v_index)
-                     --datum.v_index;
+                 if (datum.row_index > row_index)
+                     --datum.row_index;
              }
          }
 
@@ -632,6 +637,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                  obj_field,ROW_NAME_BUTTON_ID_PREFIX);
              $('#' + this.row_name_button_id).append(new_button_html);
 
+             console.log('Added listener.');
              var button_id = ROW_NAME_BUTTON_ID_PREFIX + i;
              $('#'+button_id).click(
                  row_button_clicked_listener_factory(obj_field,this));
@@ -644,7 +650,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       */
      Table.prototype.insert_column = function(column_name_to_insert)
      {
-         var insertion_h_index =
+         var insertion_col_index =
              this.next_col_index +
              this.table_params.first_data_col_index;
          // increment so that will add linearly.
@@ -656,7 +662,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              if (header_datum.col_name === column_name_to_insert)
              {
                  header_datum.visible = true;
-                 header_datum.h_index = insertion_h_index;
+                 header_datum.col_index = insertion_col_index;
              }
          }
          set_headers_positions_and_text(this.headers_texts,this.table_params);
@@ -675,7 +681,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       */
      Table.prototype.insert_field = function (field_to_insert)
      {
-         var v_index = this.next_row_index++;
+         var row_index = this.next_row_index++;
 
          for (var i =0; i < this.data_list.length; ++i)
          {
@@ -683,12 +689,12 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              if (datum.row_name === field_to_insert)
              {
                  // at this point set visibility only for row headers.
-                 // use set visibility and set_h_index methods
+                 // use set visibility and set_col_index methods
                  // separately otherwise.
-                 if (datum.h_index < table_params.first_data_col_index)
+                 if (datum.col_index < table_params.first_data_col_index)
                      datum.visible = true;
                  
-                 datum.v_index = v_index;
+                 datum.row_index = row_index;
              }
          }
          recalculate_data_visibles(
@@ -734,29 +740,29 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
      
      Table.prototype.check_sort = function()
      {
-         // update h_index for data items... sort by fields that are
-         // visible and have v_index = 0;
+         // update col_index for data items... sort by fields that are
+         // visible and have row_index = 0;
          
-         // key is old h_index, value is new h_index.
-         var h_index_mappings = {0:0};
+         // key is old col_index, value is new col_index.
+         var col_index_mappings = {0:0};
          var top_row = [];
          for (var i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
 
              // ignore data labels
-             if (datum.h_index == 0)
+             if (datum.col_index == 0)
                  continue;
 
              // Using first_data_col_index so that only sort h_indices
              // that don't include kill button or row label.
-             if ((datum.v_index == 0) && datum.visible &&
-                 (datum.h_index >= this.table_params.first_data_col_index))
+             if ((datum.row_index == 0) && datum.visible &&
+                 (datum.col_index >= this.table_params.first_data_col_index))
              {
                  top_row.push(
                      {
                          value: datum.value,
-                         h_index: datum.h_index
+                         col_index: datum.col_index
                      });
              }
          }
@@ -770,7 +776,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          for (i=0; i < top_row.length; ++i)
          {
              var top_row_item = top_row[i];
-             h_index_mappings[top_row_item.h_index] =
+             col_index_mappings[top_row_item.col_index] =
                  i + this.table_params.first_data_col_index;
          }
          // re-map all data items
@@ -778,17 +784,17 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          {
              var datum = this.data_list[i];
              // checking because kill button col and label col are not
-             // in h_index_mappings.
-             if (datum.h_index in h_index_mappings)
-                 datum.h_index = h_index_mappings[datum.h_index];
+             // in col_index_mappings.
+             if (datum.col_index in col_index_mappings)
+                 datum.col_index = col_index_mappings[datum.col_index];
          }
 
          
          for (i = 0; i < this.column_headers.length; ++i)
          {
              var item = this.column_headers[i];
-             if (item.h_index in h_index_mappings)
-                 item.h_index = h_index_mappings[item.h_index];
+             if (item.col_index in col_index_mappings)
+                 item.col_index = col_index_mappings[item.col_index];
          }
 
          this._animate_transition(false);
@@ -819,21 +825,21 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
 
      Table.prototype.make_top = function(field_to_make_top)
      {
-         var v_index = this._find_v_index(field_to_make_top);
-         if (v_index === null)
+         var row_index = this._find_row_index(field_to_make_top);
+         if (row_index === null)
              return;
 
          // run through data list and update all 
-         // elements.v_index === v_index to have 0 v_index, all
-         // elements.v_index < v_index to have one more v_index, and
+         // elements.row_index === row_index to have 0 row_index, all
+         // elements.row_index < row_index to have one more row_index, and
          // leave all others unchanged
          for (var i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             if (datum.v_index == v_index)
-                 datum.v_index = 0;
-             else if (datum.v_index < v_index)
-                 ++ datum.v_index;
+             if (datum.row_index == row_index)
+                 datum.row_index = 0;
+             else if (datum.row_index < row_index)
+                 ++ datum.row_index;
          }
 
          // actually animate transition
@@ -852,12 +858,12 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          {
              var val = column_headers[i];
              
-             // Note: initial h_index starts at
+             // Note: initial col_index starts at
              // table_params.data_col_offset and
              // increments by one each.
-             var h_index =  i + table_params.first_data_col_index;
+             var col_index =  i + table_params.first_data_col_index;
              var datum =
-                 new Datum(h_index,0,val,false,'white','black',val,val);
+                 new Datum(col_index,0,val,false,'white','black',val,val);
              to_return.push(datum);
          }
          return to_return;
