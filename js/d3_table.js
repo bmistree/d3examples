@@ -79,11 +79,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       @param {bool} visible --- Whether or not this field is visible
       @param {string} bg_color --- Color to draw for this value.
       @param {string} text_color --- Color for font color
-      @param {string} field_name --- Name of field
+      @param {string} row_name --- Name of field
       @param {string} col_name --- Name of col in.
       */
      function Datum(
-         h_index, v_index,value,visible,bg_color,text_color,field_name,
+         h_index, v_index,value,visible,bg_color,text_color,row_name,
          col_name)
      {
          this.h_index = h_index;
@@ -92,7 +92,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this.visible = visible;
          this.bg_color = bg_color;
          this.text_color = text_color;
-         this.field_name = field_name;
+         this.row_name = row_name;
          this.col_name = col_name;
      }
 
@@ -300,7 +300,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                 {
                     // set click handler to move row up if click on row name.
                     if ((datum.h_index === 1) && datum.visible)
-                        table.make_top(datum.field_name);
+                        table.make_top(datum.row_name);
                 });
      }
 
@@ -357,7 +357,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                 {
                     // set click handler to move row up if click on row name.
                     if ((datum.h_index === 1) && datum.visible)
-                        table.make_top(datum.field_name);
+                        table.make_top(datum.row_name);
                 });
          return texts;
      }
@@ -418,10 +418,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                 {
                     // only want to set click handler for icons we're displaying
                     if ((datum.h_index === 0) && datum.visible)
-                        table.remove_field(datum.field_name);
+                        table.remove_field(datum.row_name);
                     // set click handler to move row up if click on row name.
                     if ((datum.h_index === 1) && datum.visible)
-                        table.make_top(datum.field_name);
+                        table.make_top(datum.row_name);
                 });
      }
 
@@ -514,15 +514,15 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      };
 
      /**
-      @returns {int or null} --- int is vindex.  null means field_name
+      @returns {int or null} --- int is vindex.  null means row_name
       not in fields_to_draw.
       */
-     Table.prototype._find_v_index = function(finding_field_name)
+     Table.prototype._find_v_index = function(finding_row_name)
      {
          for (var i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             if ((datum.h_index === 1) && (finding_field_name === datum.field_name))
+             if ((datum.h_index === 1) && (finding_row_name === datum.row_name))
              {
                  if (datum.visible)
                      return datum.v_index;
@@ -593,7 +593,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          {
              var datum = this.data_list[i];
 
-             if (datum.field_name === field_to_insert)
+             if (datum.row_name === field_to_insert)
              {                 
                  datum.visible = true;
                  datum.v_index = v_index;
