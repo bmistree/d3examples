@@ -216,7 +216,23 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          var rectangles = d3_node.selectAll('rect').
              data(data_list).
              enter().
-             append('svg:rect').
+             append('svg:rect');
+
+         return set_rectangles_positions_and_fill(
+             rectangles,table_params).
+             on('click',
+                function(datum)
+                {
+                    // set click handler to move row up if click on row name.
+                    if ((datum.h_index === 1) && datum.visible)
+                        table.make_top(datum.field_name);
+                });
+     }
+
+     function set_rectangles_positions_and_fill(
+         rectangles_d3_node,table_params)
+     {
+         return rectangles_d3_node.
              attr('x',
                   function (datum)
                   {
@@ -237,19 +253,15 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              style('opacity',
                    function (datum)
                    {
+                       if (datum.h_index === 0)
+                           return 0;
+                       
                        if (datum.visible)
                            return 1.0;
                        return 0;
-                   }).
-             on('click',
-                function(datum)
-                {
-                    // set click handler to move row up if click on row name.
-                    if ((datum.h_index === 1) && datum.visible)
-                        table.make_top(datum.field_name);
-                });
-         return rectangles;
+                   });
      }
+     
 
      /**
       Write text labels on top of each box.
@@ -515,35 +527,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      {
          // Insert new element
          var this_ptr = this;
-         this.rectangles.transition().
-             attr('x',
-                  function (datum)
-                  {
-                      return datum_x(datum,this_ptr.table_params);
-                  }).
-             attr('y',
-                  function(datum)
-                  {
-                      // not new_entry
-                      return datum_y(datum,this_ptr.table_params,false);
-                  }).
-             attr('height',this_ptr.table_params.cell_height).
-             attr('width',this_ptr.table_params.cell_width).
-             attr('fill',
-                  function(datum)
-                  {
-                      return datum.bg_color;
-                  }).
-             style('opacity',
-                   function (datum)
-                   {
-                       if (datum.h_index === 0)
-                           return 0;
-                       
-                       if (datum.visible)
-                           return 1.0;
-                       return 0;
-                   }).
+         set_rectangles_positions_and_fill(
+             this.rectangles.transition(),this.table_params).
              duration(this_ptr.table_params.animation_duration_ms);
 
          this.kill_imgs.transition().
