@@ -714,6 +714,10 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              this.kill_imgs.transition(),this.table_params).
              duration(this_ptr.table_params.animation_duration_ms);
 
+         set_headers_positions_and_text(
+             this.headers_texts.transition(),this.table_params).
+             duration(this_ptr.table_params.animation_duration_ms);
+         
          // draws new text positions as part of animation
          set_text_positions_and_fills(
              this,this.texts.transition(),this.table_params)
@@ -779,6 +783,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                  datum.h_index = h_index_mappings[datum.h_index];
          }
 
+         
          for (i = 0; i < this.column_headers.length; ++i)
          {
              var item = this.column_headers[i];
