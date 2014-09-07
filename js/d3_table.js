@@ -658,16 +658,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this._animate_transition(-1,true);
      };
 
-
-     // function header_convert(datum_index)
-     // {
-     //     return {
-     //         h_index: datum_index + 2,
-     //         visible: true,
-     //         v_index: 0
-     //         };
-     // }
-
      /**
       @param {list} column_headers --- Each element is a string.
 
