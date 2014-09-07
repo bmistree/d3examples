@@ -697,28 +697,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          return to_return;
      }
      
-     
  })();
-
-/**
- @param {Table} table
- @param {list} field_list
-
- Randomly insert fields every two seconds.
- */
-function draw_random_fields(table,field_list)
-{
-    var index_to_draw_on = 5;
-    var redraw_func = function()
-    {
-        var rand_index = Math.floor(Math.random()*field_list.length);
-        table.insert_field(field_list[rand_index]);
-        // table.insert_field(field_list[index_to_draw_on--]);
-    };
-
-    setInterval(redraw_func,1000);
-}
-
 
 
 /**
@@ -757,23 +736,6 @@ function button_clicked_listener_factory(obj_field,table)
         $(this).remove();
     };
 }
-
-
-/**
- @returns function
- */
-function checkbox_listener_factory(obj_field,table)
-{
-    return function()
-    {
-        var is_checked = $(this).prop('checked');
-        if (is_checked)
-            table.insert_field(obj_field);
-        else
-            table.remove_field(obj_field);
-    };
-}
-
 
 function generate_checkbox_list_html(obj_fields_list)
 {
