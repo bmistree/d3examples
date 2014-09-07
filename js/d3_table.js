@@ -148,7 +148,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                  // ultimately, may be okay to just set this to null
                  // because when add field each time, will just
                  // recalculate.
-                 var h_index =
+                 var h_index = 
                      column_header_list_index +
                      table_params.first_data_col_index;
                  
@@ -531,6 +531,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          this.sorted_by_field = null;
 
          this.next_row_index = 0;
+         this.next_col_index = 0;
          // labels for columns.
          this.column_headers =
              copy_column_headers(column_headers,table_params);
@@ -633,7 +634,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
 
              var button_id = ROW_NAME_BUTTON_ID_PREFIX + i;
              $('#'+button_id).click(
-                 button_clicked_listener_factory(obj_field,this));
+                 row_button_clicked_listener_factory(obj_field,this));
          }
      };
 
@@ -643,11 +644,20 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       */
      Table.prototype.insert_column = function(column_name_to_insert)
      {
+         var insertion_h_index =
+             this.next_col_index +
+             this.table_params.first_data_col_index;
+         // increment so that will add linearly.
+         ++this.next_col_index;
+
          for (var i = 0; i < this.column_headers.length; ++i)
          {
              var header_datum = this.column_headers[i];
              if (header_datum.col_name === column_name_to_insert)
+             {
                  header_datum.visible = true;
+                 header_datum.h_index = insertion_h_index;
+             }
          }
          set_headers_positions_and_text(this.headers_texts,this.table_params);
          
@@ -655,6 +665,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              this.data_list,this.column_headers,this.table_params);
          recalculate_data_h_indices(
              this.data_list,this.column_headers,this.table_params);
+
+         this._animate_transition(-1,true);
      };
      
      /**
@@ -744,7 +756,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                      });
              }
          }
-
+         
          top_row = top_row.sort(
              function(a,b)
              {
