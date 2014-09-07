@@ -1,5 +1,6 @@
 CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
+
 (function()
  {
      /**
@@ -32,6 +33,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          else
              this.color_scale_map = color_scale_map;
 
+         // two default columns: one for row names, one for row kill button.
+         this.first_data_col_index = 2;
      }
 
      /**
@@ -50,7 +53,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          if (datum.h_index === 0)
              adjust += 30;
          var to_return = h_spacing * datum.h_index + adjust;
-
          return to_return;
      }
      /**
@@ -116,10 +118,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              var kill_row_datum =
                  new Datum(
                      0,-1,'',false,'#a0a0a0','white',field);
-
              to_return.push(row_name_datum);
              to_return.push(kill_row_datum);
-
+                  
              // now insert actual data
              for (var data_index = 0; data_index < all_data.length;
                   ++data_index)
@@ -131,10 +132,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                      color_scale = table_params.color_scale_map[field];
                  var background_color = color_scale(datum[field]);
 
+                 var h_index = data_index + table_params.first_data_col_index;
                  var new_item =
                      new Datum(
-                         data_index + 2, -1, datum[field],false,
-                         background_color,table_params.text_color,field);
+                         h_index,-1, datum[field],false, background_color,
+                         table_params.text_color,field);
                  
                  to_return.push(new_item);
              }
@@ -194,7 +196,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('x',
                   function (datum,i)
                   {
-                      return datum_x(datum,table_params) + 10;
+                      var x_val = datum_x(datum,table_params) + 10;
+                      return x_val;
                   }).
              attr('y',
                   function(datum,i)
@@ -405,7 +408,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
          this.next_row_index = 0;
          // labels for columns.
-         this.column_headers = copy_column_headers(column_headers);
+         this.column_headers =
+             copy_column_headers(column_headers,table_params);
 
          this.table_params = table_params;
          this.fields_to_draw = fields_to_draw;
@@ -418,7 +422,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
 
          this.headers_texts = draw_column_headers(
              column_header_div_id,table_params,this.column_headers);
-         
          
          this.table = d3.select('#' + table_div_id).
              append('svg:svg').
@@ -567,9 +570,6 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      {
          // update h_index for data items... sort by fields that are
          // visible and have v_index = 0;
-
-         // how many columns before data begins.
-         var data_col_offset = 2;
          
          // key is old h_index, value is new h_index.
          var h_index_mappings = {0:0};
@@ -582,11 +582,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              if (datum.h_index == 0)
                  continue;
 
-             // FIXME: note: shouldn't hard code 2 here.  Using it so
-             // that only sort h_indices that don't include kill
-             // button or row label.
+             // Using first_data_col_index so that only sort h_indices
+             // that don't include kill button or row label.
              if ((datum.v_index == 0) && datum.visible &&
-                 (datum.h_index >= data_col_offset))
+                 (datum.h_index >= this.table_params.first_data_col_index))
              {
                  top_row.push(
                      {
@@ -605,7 +604,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          for (i=0; i < top_row.length; ++i)
          {
              var top_row_item = top_row[i];
-             h_index_mappings[top_row_item.h_index] = i+data_col_offset;
+             h_index_mappings[top_row_item.h_index] =
+                 i + this.table_params.first_data_col_index;
          }
          // re-map all data items
          for (i = 0; i < this.data_list.length; ++i)
@@ -677,9 +677,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       @param {list} column_headers --- Each element is a string.
 
       @returns{list} --- Each element has an h_index in it.  Initial
-      h_index starts at 2 and increments by one each.
+      h_index starts at table_params.data_col_offset and increments
+      by one each.
       */
-     function copy_column_headers(column_headers)
+     function copy_column_headers(column_headers,table_params)
      {
          var to_return = [];
          for (var i =0; i < column_headers.length; ++i)
@@ -687,7 +688,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              var val = column_headers[i];
              to_return.push(
                  {
-                     h_index: i + 2,
+                     h_index: i + table_params.first_data_col_index,
                      v_index: 0,
                      value: val,
                      visible: true
