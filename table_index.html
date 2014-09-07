@@ -28,43 +28,43 @@
     
     
     <script>
-      var all_data = [
-          {
+      var all_data = {
+          a: {
               "hotspot":1,
               "conform":5,
               "bladder":10,
               "new_field":1,
               "other_field":2
           },
-          {
+          b: {
               "hotspot":10,
               "conform":6,
               "bladder":1,
               "new_field":3,
               "other_field":4
           },
-          {
+          c: {
               "hotspot":8,
               "conform":1,
               "bladder":3,
               "new_field":5,
               "other_field":6
           },
-          {
+          d: {
               "hotspot":3,
               "conform":10,
               "bladder":4,
               "new_field":7,
               "other_field":8
           },
-          {
+          e: {
               "hotspot":4,
               "conform":8,
               "bladder":8,
               "new_field":9,
               "other_field":10
           }
-      ];
+      };
 
       var color_scale_map = {
           "hotspot": d3.scale.linear()
@@ -83,7 +83,8 @@
       var field_list = [
           "hotspot","conform","bladder","new_field","other_field"];
       var table = TableFactory.draw_table(
-          all_data, field_list, table_params,['a','b','c','d','e']);
+          all_data, field_list, table_params);
+
       render_checkboxes("checkbox_div_id",field_list,table);
 
     </script>

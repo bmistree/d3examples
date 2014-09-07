@@ -80,9 +80,11 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       @param {string} bg_color --- Color to draw for this value.
       @param {string} text_color --- Color for font color
       @param {string} field_name --- Name of field
+      @param {string} col_name --- Name of col in.
       */
      function Datum(
-         h_index, v_index,value,visible,bg_color,text_color,field_name)
+         h_index, v_index,value,visible,bg_color,text_color,field_name,
+         col_name)
      {
          this.h_index = h_index;
          this.v_index = v_index;
@@ -91,20 +93,28 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          this.bg_color = bg_color;
          this.text_color = text_color;
          this.field_name = field_name;
+         this.col_name = col_name;
      }
+
      
      /**
-      @param {list} all_data --- Each element is an object
+      @param {map} all_data --- Each key is a column name for a piece
+      of data, each value is a javascript object that has at least a
+      field for each of the items in fields_to_draw.
 
       @param {list} fields_to_draw --- Each element is a string
 
       @param {function} color_scale --- A function that returns an
       html color code.
+
+      @param {list} column_header_list --- Each element is a string.
+      The text for each column in table.  Can be used as key to access
+      all_data fields.
       
       @return {list} --- Each element is a Datum object.
       */
      function convert_all_data_to_data_list(
-         all_data,fields_to_draw,table_params)
+         all_data,fields_to_draw,table_params, column_header_list)
      {
          var to_return = [];
          for (var fields_to_draw_index = 0;
@@ -114,29 +124,38 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              var field = fields_to_draw[fields_to_draw_index];
              var row_name_datum =
                  new Datum(
-                     1,-1,field,false,'#a0a0a0','white',field);
+                     1,-1,field,false,'#a0a0a0','white',field,null);
              var kill_row_datum =
                  new Datum(
-                     0,-1,'',false,'#a0a0a0','white',field);
+                     0,-1,'',false,'#a0a0a0','white',field,null);
              to_return.push(row_name_datum);
              to_return.push(kill_row_datum);
-                  
-             // now insert actual data
-             for (var data_index = 0; data_index < all_data.length;
-                  ++data_index)
-             {
-                 var datum = all_data[data_index];
 
+             // now insert actual data
+             for (var column_header_list_index = 0;
+                  column_header_list_index < column_header_list.length;
+                  ++column_header_list_index)
+             {
+                 var column_header =
+                     column_header_list[column_header_list_index];
+                 var datum = all_data[column_header];
+                 
                  var color_scale = table_params.default_color_scale;
                  if (field in table_params.color_scale_map)
                      color_scale = table_params.color_scale_map[field];
                  var background_color = color_scale(datum[field]);
-
-                 var h_index = data_index + table_params.first_data_col_index;
+                 
+                 // ultimately, may be okay to just set this to null
+                 // because when add field each time, will just
+                 // recalculate.
+                 var h_index =
+                     column_header_list_index +
+                     table_params.first_data_col_index;
+                 
                  var new_item =
                      new Datum(
                          h_index,-1, datum[field],false, background_color,
-                         table_params.text_color,field);
+                         table_params.text_color,field,column_header);
                  
                  to_return.push(new_item);
              }
@@ -144,6 +163,44 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          return to_return;
      }
 
+     /**
+      @param {list} all_data_list --- Each element is a datum object.
+      Assign a new h_index for each object that are visible.
+
+      @param {list} header_data_list --- Each element is a datum
+      object.  Sets h_index for all visible objects.
+      */
+     function recalculate_data_h_indices(all_data_list,header_data_list,table_params)
+     {
+         var visible_header_to_h_index_map = {};
+         var number_visible_headers = 0;
+         for (var i = 0; i < header_data_list.length; ++i)
+         {
+             var header_datum = header_data_list[i];
+             if (header_datum.visible)
+             {
+                 var visible_header_h_index =
+                     table_params.first_data_col_index +
+                     num_visible_headers;
+                 ++num_visible_headers;
+
+                 header_datum.h_index = visible_header_h_index;
+                 visible_header_to_h_index_map[header_datum.col_name] =
+                     visible_header_h_index;
+             }
+         }
+
+         for (i = 0; i < all_data_list.length; ++i)
+         {
+             var datum = all_data_list[i];
+             if (datum.col_name in visible_header_to_h_index_map)
+             {
+                 datum.h_index =
+                     visible_header_to_h_index_map[datum.col_name];
+             }
+         }
+     }
+     
      TableFactory = new Tabler();
      function Tabler()
      { }
@@ -161,10 +218,10 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      };
 
      Tabler.prototype.draw_table = function(
-         all_data,fields_to_draw,table_params,column_headers)
+         all_data,fields_to_draw,table_params)
      {
          var to_return = new Table(
-             all_data,fields_to_draw,table_params,column_headers);
+             all_data,fields_to_draw,table_params);
          return to_return;
      };
 
@@ -399,11 +456,19 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      }
 
      /**
+      @param {map} all_data --- Each key is a name for a piece of
+      data.  Will be the header for each column.  Each value is an
+      individual data item.
+      
       @param {list} fields_to_draw --- Each element is a string:
       the field name of objects to draw.
       */
-     function Table(all_data,fields_to_draw,table_params,column_headers)
+     function Table(all_data,fields_to_draw,table_params)
      {
+         var column_headers = [];
+         for (var key in all_data)
+             column_headers.push(key);
+
          // when have no data, do not sort initial input data objects.
          // when presenting data, should be a string containing the
          // field to draw
@@ -413,7 +478,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          // labels for columns.
          this.column_headers =
              copy_column_headers(column_headers,table_params);
-
+         
          this.table_params = table_params;
          this.fields_to_draw = fields_to_draw;
 
@@ -432,10 +497,9 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              attr('height', table_params.div_height);
 
          // preserved so that can re-sort based on different fields
-         this.all_data = all_data;
          this.data_list =
              convert_all_data_to_data_list(
-                 all_data,fields_to_draw,table_params);
+                 all_data,fields_to_draw,table_params,column_headers);
          
          var this_ptr = this;
          this.rectangles = draw_rectangles(
@@ -693,7 +757,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              // increments by one each.
              var h_index =  i + table_params.first_data_col_index;
              var datum =
-                 new Datum(h_index,0,val,true,'white','black',val);
+                 new Datum(h_index,0,val,false,'white','black',val,val);
              to_return.push(datum);
          }
          return to_return;
