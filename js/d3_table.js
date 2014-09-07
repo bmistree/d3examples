@@ -56,6 +56,27 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
      }
 
      /**
+      @param {int} h_index --- index of all_data
+      @param {int} v_index --- index of fields_to_draw
+      @param {Any} value
+      @param {bool} visible --- Whether or not this field is visible
+      @param {string} bg_color --- Color to draw for this value.
+      @param {string} text_color --- Color for font color
+      @param {string} field_name --- Name of field
+      */
+     function Datum(
+         h_index, v_index,value,visible,bg_color,text_color,field_name)
+     {
+         this.h_index = h_index;
+         this.v_index = v_index;
+         this.value = value;
+         this.visible = visible;
+         this.bg_color = bg_color;
+         this.text_color = text_color;
+         this.field_name = field_name;
+     }
+     
+     /**
       @param {list} all_data --- Each element is an object
 
       @param {list} fields_to_draw --- Each element is a string
@@ -63,15 +84,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       @param {function} color_scale --- A function that returns an
       html color code.
       
-      @return {list} --- Each element is an object of the form:
-      {
-          h_index: <int>, // index of all_data
-          v_index: <int>, // index of fields_to_draw
-          datum: value,
-          visible: <bool>, // whether or not this field is visible
-          bg_color: <string>,
-          text_color: <string>
-      }
+      @return {list} --- Each element is a Datum object.
       */
      function convert_all_data_to_data_list(
          all_data,fields_to_draw,table_params)
@@ -82,25 +95,12 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
               ++fields_to_draw_index)
          {
              var field = fields_to_draw[fields_to_draw_index];
-
-             var row_name_datum = {
-                 h_index: 1,
-                 v_index: -1,
-                 datum: field,
-                 bg_color: '#a0a0a0',
-                 text_color: 'white',
-                 visible: false,
-                 field_name: field
-                 };
-             var kill_row_datum = {
-                 h_index: 0,
-                 v_index: -1,
-                 datum: '',
-                 bg_color: '#a0a0a0',
-                 text_color: 'white',
-                 visible: false,
-                 field_name: field
-             };
+             var row_name_datum =
+                 new Datum(
+                     1,-1,field,false,'#a0a0a0','white',field);
+             var kill_row_datum =
+                 new Datum(
+                     0,-1,'',false,'#a0a0a0','white',field);
 
              to_return.push(row_name_datum);
              to_return.push(kill_row_datum);
@@ -110,18 +110,15 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
                   ++data_index)
              {
                  var datum = all_data[data_index];
-                 to_return.push(
-                     {
-                         // starting horizontal index at 2 instead of 0
-                         // to accomodate row labels and kill rows.
-                         h_index: data_index + 2,
-                         v_index: -1,
-                         datum: datum[field],
-                         bg_color: table_params.color_scale(datum[field]),
-                         text_color: table_params.text_color,
-                         visible: false,
-                         field_name: field
-                     });
+                 var new_item =
+                     new Datum(
+                         data_index + 2, -1, datum[field],
+                         false,
+                         table_params.color_scale(datum[field]),
+                         table_params.text_color,
+                         field);
+                 
+                 to_return.push(new_item);
              }
          }
          return to_return;
@@ -198,16 +195,8 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
       Render the backgrounds for all background rectangles.
       
       @param {Table} table
-      @param {D3 node} d3_node --- Selection from d3. 
-      @param {list} data_list --- Each element is an object of the form:
-      {
-          h_index: <int>, // index of all_data
-          v_index: <int>, // index of fields_to_draw
-          datum: value,
-          visible: <bool>, // whether or not this field is visible
-          bg_color: <string>,
-          text_color: <string>
-      }
+      @param {D3 node} d3_node --- Selection from d3.
+      @param {list} data_list --- Each element is a Datum object.
       @param {TableParams} table_params --- 
      */
      function draw_rectangles(table,d3_node,data_list,table_params)
@@ -312,7 +301,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              text(function(datum)
                   {
                       if (datum.visible)
-                          return datum.datum;
+                          return datum.value;
                       return '';
                   }).
              attr('fill',
@@ -574,7 +563,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
              {
                  top_row.push(
                      {
-                         datum: datum.datum,
+                         datum: datum.value,
                          h_index: datum.h_index
                      });
              }
@@ -583,7 +572,7 @@ CHECKBOX_ID_PREFIX = 'd3_table_checkbox_prefix_id_';
          top_row = top_row.sort(
              function(a,b)
              {
-                 return a.datum - b.datum;
+                 return a.value - b.value;
              });
 
          for (i=0; i < top_row.length; ++i)
