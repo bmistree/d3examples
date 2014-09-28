@@ -481,8 +481,6 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                     if ((datum.col_index === 0) && datum.visible)
                         table.remove_field(datum.row_name);
 
-                    // FIXME: should this be row_index???
-
                     // set click handler to move row up if click on
                     // row name.
                     if ((datum.col_index === 1) && datum.visible)
