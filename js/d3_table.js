@@ -639,7 +639,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                  continue;
 
              var new_button_html = single_button_element_html(
-                 obj_field,ROW_NAME_BUTTON_ID_PREFIX);
+                 obj_field,i,ROW_NAME_BUTTON_ID_PREFIX);
              $('#' + this.row_name_button_id).append(new_button_html);
 
              console.log('Added listener.');
