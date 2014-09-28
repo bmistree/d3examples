@@ -218,7 +218,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       @param {list} header_data_list --- Each element is a datum
       object.  Sets col_index for all visible objects.
       */
-     function recalculate_data_h_indices(all_data_list,header_data_list,table_params)
+     function recalculate_data_h_indices(
+         all_data_list,header_data_list,table_params)
      {
          var visible_header_to_col_index_map = {};
          var num_visible_headers = 0;
@@ -354,7 +355,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              on('click',
                 function(datum)
                 {
-                    // set click handler to move row up if click on row name.
+                    // set click handler to move row up if click on
+                    // row name.
                     if ((datum.col_index === 1) && datum.visible)
                         table.make_top(datum.row_name);
                 });
@@ -411,7 +413,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              .on('click',
                 function(datum)
                 {
-                    // set click handler to move row up if click on row name.
+                    // set click handler to move row up if click on
+                    // row name.
                     if ((datum.col_index === 1) && datum.visible)
                         table.make_top(datum.row_name);
                 });
@@ -423,7 +426,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
 
       @returns d3 node that setting positions and fills for.
       */
-     function set_text_positions_and_fills(table,texts_d3_node,table_params)
+     function set_text_positions_and_fills(
+         table,texts_d3_node,table_params)
      {
          return texts_d3_node.attr('x',
                   function (datum)
@@ -472,13 +476,15 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              on('click',
                 function(datum)
                 {
-                    // only want to set click handler for icons we're displaying
+                    // only want to set click handler for icons we're
+                    // displaying
                     if ((datum.col_index === 0) && datum.visible)
                         table.remove_field(datum.row_name);
 
                     // FIXME: should this be row_index???
                     
-                    // set click handler to move row up if click on row name.
+                    // set click handler to move row up if click on
+                    // row name.
                     if ((datum.col_index === 1) && datum.visible)
                         table.make_top(datum.row_name);
                 });
@@ -582,7 +588,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
          for (var i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             if ((datum.col_index === 1) && (finding_row_name === datum.row_name))
+             if ((datum.col_index === 1) &&
+                 (finding_row_name === datum.row_name))
              {
                  if (datum.visible)
                      return datum.row_index;
@@ -598,8 +605,6 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
       */
      Table.prototype.remove_field = function (field_to_remove)
      {
-         console.log('Removing field');
-         
          var row_index = this._find_row_index(field_to_remove);
          var this_ptr = this;
          
