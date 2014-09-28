@@ -217,6 +217,8 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
 
       @param {list} header_data_list --- Each element is a datum
       object.  Sets col_index for all visible objects.
+
+      Recalculates col_index for each value
       */
      function recalculate_data_h_indices(
          all_data_list,header_data_list,table_params)
@@ -598,6 +600,34 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
      };
 
      /**
+      @param {list} data_list --- Each element is a datum.
+      */
+     function recalculate_row_indices (data_list)
+     {
+         // indexed is value name; value is datum for a column.
+         var row_descriptor_map = {};
+         for (var i = 0; i < data_list.length; ++i)
+         {
+             var datum = data_list[i];
+             if (datum.col_index === 0)
+                 row_descriptor_map[datum.row_name] = datum;
+         }
+         
+         for (i = 0; i < data_list.length; ++i)
+         {
+             var datum = data_list[i];
+             if (!(datum.row_name in row_descriptor_map))
+                 console.log('Error: unknown row name');
+             else
+             {
+                 datum.row_index =
+                     row_descriptor_map[datum.row_name].row_index;
+             }
+         }
+     }
+     
+     
+     /**
       @param {string} field_to_remove --- Name of object field to
       remove.
       */
@@ -605,27 +635,32 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
      {
          var row_index = this._find_row_index(field_to_remove);
          var this_ptr = this;
+
+         console.log("Removing row index: " + row_index);
          
          // field doesn't exist.
          if (row_index === null)
              return;
-
-         for (var i =0; i < this.data_list.length; ++i)
+         
+         for (var i = 0; i < this.data_list.length; ++i)
          {
              var datum = this.data_list[i];
-             if (datum.row_index == row_index)
+             // header 
+             if (datum.col_index === 0)
              {
-                 datum.row_index = -1;
-                 datum.visible = false;
-             }
-
-             if (datum.visible)
-             {
-                 if (datum.row_index > row_index)
+                 if (datum.row_index == row_index)
+                 {
+                     datum.visible = false;
+                     datum.row_index = -1;
+                 }
+                 else if (datum.row_index > row_index)
                      --datum.row_index;
              }
          }
-
+         recalculate_row_indices (this.data_list);
+         recalculate_data_visibles(
+             this.data_list,this.column_headers,this.table_params);
+         
          --this.next_row_index;
          this._animate_transition(true);
 
@@ -659,7 +694,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
              this.table_params.first_data_col_index;
          // increment so that will add linearly.
          ++this.next_col_index;
-
+         
          for (var i = 0; i < this.column_headers.length; ++i)
          {
              var header_datum = this.column_headers[i];
