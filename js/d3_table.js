@@ -44,7 +44,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
      function datum_x(datum,table_params)
      {
          if (! datum.visible)
-             return 0;
+             return -75;
          
          var h_spacing =
              table_params.cell_width +
@@ -482,7 +482,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                         table.remove_field(datum.row_name);
 
                     // FIXME: should this be row_index???
-                    
+
                     // set click handler to move row up if click on
                     // row name.
                     if ((datum.col_index === 1) && datum.visible)
@@ -642,6 +642,7 @@ COL_NAME_BUTTON_ID_PREFIX = 'd3_table_col_name_prefix_id_';
                  obj_field,i,ROW_NAME_BUTTON_ID_PREFIX);
              $('#' + this.row_name_button_id).append(new_button_html);
 
+             
              console.log('Added listener.');
              var button_id = ROW_NAME_BUTTON_ID_PREFIX + i;
              $('#'+button_id).click(
