@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"
+          media="screen">
+    </link>
+    
+    <script type="text/javascript" src="lib/jquery-2.1.1.min.js">
+    </script>
+    <script type="text/javascript" src="lib/d3.min.js">
+    </script>
+    <script type="text/javascript"
+            src="lib/bootstrap/js/bootstrap.min.js">
+    </script>
+    
+    <script type="text/javascript" src="js/compare.js">
+    </script>
+    
+  </head>
+
+  <body >
+
+    <br/>
+    <div id="drawing_div_id">
+    </div>
+    
+    
+    <script>
+      var all_data = {
+          a: {
+              "hotspot":1,
+              "conform":5,
+              "bladder":10,
+              "new_field":1,
+              "other_field":2
+          },
+          b: {
+              "hotspot":10,
+              "conform":6,
+              "bladder":1,
+              "new_field":3,
+              "other_field":4
+          },
+          c: {
+              "hotspot":8,
+              "conform":1,
+              "bladder":3,
+              "new_field":5,
+              "other_field":6
+          },
+          d: {
+              "hotspot":3,
+              "conform":10,
+              "bladder":4,
+              "new_field":7,
+              "other_field":8
+          },
+          e: {
+              "hotspot":4,
+              "conform":8,
+              "bladder":8,
+              "new_field":9,
+              "other_field":10
+          }
+      };
+
+      var compare_params = new CompareParams("drawing_div_id");
+      
+      var field_list = [
+          "hotspot","conform","bladder","new_field","other_field"];
+      var compare = new Compare(
+          all_data.a, "A",all_data.b, "B", field_list, compare_params);
+    </script>
+    
+  </body>
+  
+</html>
+
