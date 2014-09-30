@@ -9,6 +9,8 @@ function CompareParams(div_id_to_draw_on)
     this.header_spacing = 80;
 
     this.header_y_offset = 20;
+
+    this.row_label_div_width = 60;
     
     this.object_a_y_offset = 20;
     this.object_b_y_offset = 40;
@@ -58,13 +60,22 @@ Compare.prototype.update = function ()
         this.compare_params.prepend_div_id('column_header_div_id');
     var table_body_div_id =
         this.compare_params.prepend_div_id('table_body_div_id');
+    var row_body_div_id =
+        this.compare_params.prepend_div_id('row_body_div_id');
 
     $('#' + this.compare_params.div_id_to_draw_on).html(
-        '<div id="' + column_header_div_id + '"></div>' +
-            '<div id="' + table_body_div_id + '"></div>');
+        '<table><tr> ' +
+            '<td></td>' +
+            '<td id="' + column_header_div_id + '"></td>' +
+            '</tr>' +
+            '<tr>' +
+            '<td id="' + row_body_div_id + '"></td>' +
+            '<td id="' + table_body_div_id + '"></td>' +
+            '</tr></table>');
 
     draw_headers(this,column_header_div_id);
     draw_body(this,table_body_div_id);
+    draw_row_labels(this,row_body_div_id);
 };
 
 function PairedObject(
@@ -75,6 +86,39 @@ function PairedObject(
     this.belongs_to_a = belongs_to_a;
     this.col_index = col_index;
     this.is_delta = is_delta;
+}
+
+function draw_row_labels(compare_object,row_body_div_id)
+{
+    var label_list = [
+        compare_object.obj_a_name, compare_object.obj_b_name,
+        'Delta'];
+
+    // draw paired objects
+    var body = d3.select('#' + row_body_div_id).
+        append('svg:svg').
+        attr('width', compare_object.compare_params.row_label_div_width).
+        attr('height', 200);
+
+    var row_label_texts = body.selectAll('text').
+        data(label_list).
+        enter().
+        append('svg:text').
+            attr('x',
+                 function (datum,i)
+                 {
+                     return header_x(0,compare_object.compare_params);
+                 }).
+            attr('y',
+                 function(datum,i)
+                 {
+                     if (i == 0)
+                         return compare_object.compare_params.object_a_y_offset;
+                     else if (i == 1)
+                         return compare_object.compare_params.object_b_y_offset;
+                     return compare_object.compare_params.object_delta_y_offset;
+                 })
+        .text(function(datum) {return datum;});
 }
 
 /**
