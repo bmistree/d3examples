@@ -12,9 +12,11 @@ function CompareParams(div_id_to_draw_on)
     
     this.object_a_y_offset = 20;
     this.object_b_y_offset = 40;
+    this.object_delta_y_offset = 60;
 
     this.body_rect_a_y_offset = 5;
     this.body_rect_b_y_offset = 25;
+    this.body_rect_delta_y_offset = 45;
     this.cell_height = 20;
     this.cell_width = 80;
 }
@@ -65,12 +67,14 @@ Compare.prototype.update = function ()
     draw_body(this,table_body_div_id);
 };
 
-function PairedObject(value,background_color,belongs_to_a,col_index)
+function PairedObject(
+    value,background_color,belongs_to_a,col_index,is_delta)
 {
     this.value = value;
     this.background_color = background_color;
     this.belongs_to_a = belongs_to_a;
     this.col_index = col_index;
+    this.is_delta = is_delta;
 }
 
 /**
@@ -82,12 +86,15 @@ function draw_body(compare_object,body_div_id)
 {
     var normalized_min_color_scale = d3.scale.linear()
         .domain([0,1])
-        .range(["red", "white"]);
+        .range(["green", "white"]);
+
     // put the normalized min value into this to get result
     var normalized_max_color_scale = d3.scale.linear()
         .domain([0,1])
-        .range(["green", "white"]);
-    
+        .range(["red", "white"]);
+    var normalized_delta_color_scale = d3.scale.linear()
+        .domain([-1,1])
+        .range(["green","white","red"]);
     
     // First, convert all object data to PairedObjects,
     // which then feed into d3 selector.
@@ -98,10 +105,12 @@ function draw_body(compare_object,body_div_id)
         var field = fields_to_compare_list[i];
         var object_a_value = compare_object.obj_a[field];
         var object_b_value = compare_object.obj_b[field];
-
+        var delta_value = object_a_value - object_b_value;
+        
         var max_value = Math.max(object_a_value,object_b_value);
         var min_value = Math.min(object_a_value,object_b_value);
         var normalized_min_value = min_value/max_value;
+        var normalized_delta_value = (delta_value)/max_value;
         
         // note that we intentionally enter normalized_min_value
         // to get mirrored color intensity, except for max value.
@@ -109,6 +118,8 @@ function draw_body(compare_object,body_div_id)
             normalized_max_color_scale(normalized_min_value);
         var min_color =
             normalized_min_color_scale(normalized_min_value);
+        var delta_color =
+            normalized_delta_color_scale(normalized_delta_value);
 
         var a_color = min_color;
         var b_color = max_color;
@@ -119,10 +130,15 @@ function draw_body(compare_object,body_div_id)
             b_color = min_color;
         }
 
-        var a_obj = new PairedObject(object_a_value, a_color,true,i);
-        var b_obj = new PairedObject(object_b_value, b_color,false,i);
+        var a_obj =
+            new PairedObject(object_a_value, a_color,true,i,false);
+        var b_obj =
+            new PairedObject(object_b_value, b_color,false,i,false);
+        var delta_obj =
+            new PairedObject(delta_value, delta_color,false,i,true);
         paired_object_list.push(a_obj);
         paired_object_list.push(b_obj);
+        paired_object_list.push(delta_obj);
     }
 
     // draw paired objects
@@ -150,10 +166,15 @@ function draw_body(compare_object,body_div_id)
              {
                  var to_return = 
                      compare_object.compare_params.body_rect_a_y_offset;
-                 if (! datum.belongs_to_a)
+                 if ((! datum.belongs_to_a) && (! datum.is_delta))
                  {
                      to_return =
                          compare_object.compare_params.body_rect_b_y_offset;
+                 }
+                 else if (datum.is_delta)
+                 {
+                     to_return =
+                         compare_object.compare_params.body_rect_delta_y_offset;
                  }
                  return to_return;
              }).
@@ -179,6 +200,8 @@ function draw_body(compare_object,body_div_id)
                  {
                      if (datum.belongs_to_a)
                          return compare_object.compare_params.object_a_y_offset;
+                     else if (datum.is_delta)
+                         return compare_object.compare_params.object_delta_y_offset;
                      return compare_object.compare_params.object_b_y_offset;
                  }).
             text(
